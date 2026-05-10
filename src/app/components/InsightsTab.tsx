@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, Component, ErrorInfo, ReactNode, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
 import { useApp, ActivityType } from '../App';
+import { SparklineChart } from './Charts';
 import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 // ─── Error Boundary ────────────────────────────────────────────────────────────
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; errorMsg: string }> {
@@ -220,7 +221,7 @@ function SparklineChart({ data, color }: { data: { day: string; score: number }[
   }).join(' ');
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
+    <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} className="w-full h-auto">
       <polyline
         fill="none"
         stroke={color}
@@ -338,29 +339,7 @@ export function InsightsTab() {
 
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       
-      const { jsPDF } = await import('jspdf');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-      const blob = pdf.output('blob');
-      const file = new File([blob], 'Petory_VIP_Health_Report.pdf', { type: 'application/pdf' });
-
-      // iOS Safari and Android Share Sheet support
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
-          files: [file]
-        });
-      } else {
-        // Fallback for desktop PC: Download the PDF directly
+      const downloadFallback = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -369,10 +348,29 @@ export function InsightsTab() {
         link.click();
         document.body.removeChild(link);
         setTimeout(() => URL.revokeObjectURL(url), 100);
+      };
+
+      // iOS Safari and Android Share Sheet support
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
+            files: [file]
+          });
+        } catch (shareError: any) {
+          console.warn('Share aborted or failed, falling back to download:', shareError);
+          // If user gesture expired (NotAllowedError) or aborted, fallback to download
+          if (shareError.name !== 'AbortError') {
+            downloadFallback();
+          }
+        }
+      } else {
+        // Fallback for desktop PC: Download the PDF directly
+        downloadFallback();
       }
-    } catch (err) {
-      console.error('PDF Generation/Share failed:', err);
-      alert(KO ? '리포트 생성 중 오류가 발생했습니다. 다시 시도해주세요.' : 'Failed to generate report. Please try again.');
+    } catch (err: any) {
+      console.error('PDF Generation failed:', err);
+      alert(KO ? `리포트 생성 오류: ${err.message}` : `Error: ${err.message}`);
     } finally {
       setIsPrinting(false);
     }
