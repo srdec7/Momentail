@@ -312,14 +312,16 @@ export function InsightsTab() {
   };
  
   const printReport = () => {
-    // Add class to body to trigger specific iOS Safari print overrides in index.css
+    // Synchronous DOM update is required for iOS Safari user-gesture bypass
     document.body.classList.add('is-printing');
+    
+    // Call print in the exact same tick!
+    window.print();
+    
+    // Cleanup afterwards
     setTimeout(() => {
-      window.print();
-      setTimeout(() => {
-        document.body.classList.remove('is-printing');
-      }, 1000);
-    }, 50);
+      document.body.classList.remove('is-printing');
+    }, 1000);
   };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
