@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer } from 'lucide-react';
 import { useApp, ActivityType } from '../App';
 import { SparklineChart } from './Charts';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 // ─── Error Boundary ────────────────────────────────────────────────────────────
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; errorMsg: string }> {
@@ -289,6 +291,7 @@ export function InsightsTab() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<DogEngineResult | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
  
   const todayEntries = timeline.filter(e => e.petId === pet.id && e.date === '2026-05-04');
 
@@ -311,17 +314,78 @@ export function InsightsTab() {
     }, 1600);
   };
  
-  const printReport = () => {
-    // Synchronous DOM update is required for iOS Safari user-gesture bypass
-    document.body.classList.add('is-printing');
-    
-    // Call print in the exact same tick!
-    window.print();
-    
-    // Cleanup afterwards
-    setTimeout(() => {
-      document.body.classList.remove('is-printing');
-    }, 1000);
+  useEffect(() => {
+    if (showReport && result) {
+      const generatePDF = async () => {
+        try {
+          const element = document.getElementById('vip-report-content');
+          if (!element) return;
+          
+          const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight,
+            onclone: (clonedDoc) => {
+              const clonedElement = clonedDoc.getElementById('vip-report-content');
+              if (clonedElement) {
+                clonedElement.style.height = 'auto';
+                clonedElement.style.overflow = 'visible';
+              }
+            }
+          });
+          
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          const blob = pdf.output('blob');
+          const file = new File([blob], 'Petory_VIP_Health_Report.pdf', { type: 'application/pdf' });
+          setPdfFile(file);
+        } catch (e) {
+          console.error("Background PDF gen failed", e);
+        }
+      };
+      
+      // Delay slightly to ensure DOM is fully rendered
+      setTimeout(generatePDF, 600);
+    } else {
+      setPdfFile(null);
+    }
+  }, [showReport, result]);
+
+  const downloadFallback = (file: File) => {
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  };
+
+  const printReport = async () => {
+    if (!pdfFile) return;
+
+    // 100% synchronous call to bypass Safari's user-gesture block
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      try {
+        await navigator.share({
+          title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
+          files: [pdfFile]
+        });
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+           downloadFallback(pdfFile);
+        }
+      }
+    } else {
+      downloadFallback(pdfFile);
+    }
   };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
@@ -701,10 +765,11 @@ export function InsightsTab() {
                 </button>
                 <button 
                   onClick={printReport}
-                  className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2"
+                  disabled={!pdfFile}
+                  className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                 >
-                  <Printer size={16} />
-                  {KO ? '와이파이 인쇄 / PDF 저장' : 'PRINT / SAVE PDF'}
+                  {!pdfFile ? <RefreshCw size={16} className="animate-spin" /> : <Printer size={16} />}
+                  {KO ? (!pdfFile ? '준비중...' : '인쇄/PDF저장') : (!pdfFile ? 'PREPARING...' : 'PRINT / SAVE PDF')}
                 </button>
               </div>
             </motion.div>
