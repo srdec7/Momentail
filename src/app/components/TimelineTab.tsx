@@ -6,13 +6,13 @@ import { addTimelineEntry, updateTimelineEntry, deleteTimelineEntry } from '../.
 
 // ─── Activity Config ───────────────────────────────────────────────────────────
 const ACTIVITY_CONFIG: Record<ActivityType, { icon: React.ReactNode; labelKO: string; labelEN: string; color: string; bg: string }> = {
-  meal:    { icon: <Utensils size={20} />,      labelKO: '식사',   labelEN: 'Meal',    color: '#FF9F43', bg: '#FFF3E0'  },
-  walk:    { icon: <Footprints size={20} />,    labelKO: '산책',   labelEN: 'Walk',    color: '#1DD1A1', bg: '#E8F5E9'  },
-  sleep:   { icon: <Moon size={20} />,          labelKO: '수면',   labelEN: 'Sleep',   color: '#5F27CD', bg: '#F3E5F5' },
-  toilet:  { icon: <Droplets size={20} />,      labelKO: '배변',   labelEN: 'Toilet',  color: '#00D2D3', bg: '#E0F7FA' },
-  vet:     { icon: <Stethoscope size={20} />,   labelKO: '병원',   labelEN: 'Vet',     color: '#FF4D4D', bg: '#FFEBEE' },
-  bath:    { icon: <Bath size={20} />,          labelKO: '목욕',   labelEN: 'Bath',    color: '#48DBFB', bg: '#E1F5FE' },
-  other:   { icon: <Tag size={20} />,           labelKO: '기타',   labelEN: 'Other',   color: '#576574', bg: '#F5F6F7'  },
+  meal:    { icon: <Utensils size={20} />,      labelKO: '식사',   labelEN: 'Meal',    color: '#F59E0B', bg: '#FFFBEB'  },
+  walk:    { icon: <Footprints size={20} />,    labelKO: '산책',   labelEN: 'Walk',    color: '#10B981', bg: '#ECFDF5'  },
+  sleep:   { icon: <Moon size={20} />,          labelKO: '수면',   labelEN: 'Sleep',   color: '#7C3AED', bg: '#F5F3FF' },
+  toilet:  { icon: <Droplets size={20} />,      labelKO: '배변',   labelEN: 'Toilet',  color: '#0EA5E9', bg: '#F0F9FF' },
+  vet:     { icon: <Stethoscope size={20} />,   labelKO: '병원',   labelEN: 'Vet',     color: '#EF4444', bg: '#FEF2F2' },
+  bath:    { icon: <Bath size={20} />,          labelKO: '목욕',   labelEN: 'Bath',    color: '#06B6D4', bg: '#ECFEFF' },
+  other:   { icon: <Tag size={20} />,           labelKO: '기타',   labelEN: 'Other',   color: '#64748B', bg: '#F8FAFC'  },
 };
 
 // ─── Add Activity Modal (inline bottom sheet) ─────────────────────────────────
@@ -66,13 +66,13 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 350 }}
         className="rounded-t-3xl p-5"
-        style={{ background: '#EAE6DC' }}
+        style={{ background: '#FFFFFF' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle */}
-        <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ background: 'rgba(44,54,57,0.2)' }} />
+        <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ background: '#E2E8F0' }} />
 
-        <h3 className="text-sm font-bold mb-4" style={{ color: '#1A2421' }}>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: '#0F172A' }}>
           {KO ? '활동 기록 추가' : 'Add Activity'}
         </h3>
 
@@ -102,15 +102,15 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
         </div>
 
         {/* Time input */}
-        <div className="flex items-center gap-2 mb-3 p-3 rounded-xl" style={{ background: 'rgba(44,54,57,0.06)' }}>
-          <Clock size={14} style={{ color: '#8a897e' }} />
-          <span className="text-sm" style={{ color: '#8a897e' }}>{KO ? '시간' : 'Time'}</span>
+        <div className="flex items-center gap-2 mb-3 p-3 rounded-xl" style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+          <Clock size={14} style={{ color: '#94A3B8' }} />
+          <span className="text-sm font-medium" style={{ color: '#64748B' }}>{KO ? '시간' : 'Time'}</span>
           <input
             type="time"
             value={time}
             onChange={e => setTime(e.target.value)}
-            className="ml-auto text-base font-medium outline-none bg-transparent"
-            style={{ color: '#2C3639' }}
+            className="ml-auto text-base font-semibold outline-none bg-transparent"
+            style={{ color: '#0F172A' }}
           />
         </div>
 
@@ -122,9 +122,9 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
           rows={2}
           className="w-full px-3 py-2.5 rounded-xl text-base outline-none resize-none mb-4"
           style={{
-            background: 'rgba(44,54,57,0.06)',
-            border: '1px solid rgba(44,54,57,0.08)',
-            color: '#2C3639',
+            background: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            color: '#0F172A',
           }}
         />
 
@@ -133,14 +133,14 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
           <button
             onClick={onClose}
             className="flex-1 py-3 rounded-xl text-base font-medium"
-            style={{ background: 'rgba(44,54,57,0.08)', color: '#8a897e' }}
+            style={{ background: '#F1F5F9', color: '#64748B' }}
           >
             {KO ? '취소' : 'Cancel'}
           </button>
           <button
             onClick={handleSave}
             className="flex-1 py-3 rounded-xl text-base font-semibold text-white"
-            style={{ background: 'linear-gradient(135deg, #A27B5C, #8b6347)' }}
+            style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)' }}
           >
             {KO ? '저장' : 'Save'}
           </button>
@@ -219,12 +219,12 @@ function TimelineItem({ entry, index }: EntryProps) {
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <span
-                  className="text-[15px] font-black tracking-tight"
-                  style={{ color: '#1A2421' }}
+                  className="text-[15px] font-semibold"
+                  style={{ color: '#0F172A' }}
                 >
                   {KO ? cfg.labelKO : cfg.labelEN}
                 </span>
-                <span className="text-[12px] font-extrabold" style={{ color: '#3E6D52' }}>
+                <span className="text-[12px] font-medium" style={{ color: '#94A3B8' }}>
                   {entry.time}
                 </span>
               </div>
@@ -243,9 +243,9 @@ function TimelineItem({ entry, index }: EntryProps) {
                 </div>
               ) : (
                 entry.note ? (
-                  <p className="text-sm mt-0.5 leading-relaxed font-medium" style={{ color: '#5C6B64' }}>{entry.note}</p>
+                  <p className="text-sm mt-0.5 leading-relaxed" style={{ color: '#475569' }}>{entry.note}</p>
                 ) : (
-                  <p className="text-[11px] mt-0.5 opacity-50 italic font-medium" style={{ color: '#8a8e8b' }}>
+                  <p className="text-[11px] mt-0.5 italic" style={{ color: '#CBD5E1' }}>
                     {KO ? '메모 없음' : 'No notes'}
                   </p>
                 )
@@ -327,12 +327,12 @@ export function TimelineTab() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2
-              className="text-base font-black tracking-tight"
-              style={{ color: '#1A2421' }}
+              className="text-base font-semibold"
+              style={{ color: '#0F172A' }}
             >
               {KO ? '활동 타임라인' : 'Activity Timeline'}
             </h2>
-            <p className="text-[12px] font-bold" style={{ color: '#5C6B64' }}>
+            <p className="text-[12px]" style={{ color: '#94A3B8' }}>
               {KO ? '2026.05.04' : 'May 4, 2026'} · {KO ? `${activityCount}개의 기록` : `${activityCount} activities`}
             </p>
           </div>
@@ -342,7 +342,7 @@ export function TimelineTab() {
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold"
-            style={{ background: 'linear-gradient(135deg, #A27B5C, #8b6347)', color: '#fff' }}
+            style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', color: '#fff' }}
           >
             <Plus size={14} strokeWidth={2.5} />
             {KO ? '기록 추가' : 'Add'}
@@ -358,8 +358,8 @@ export function TimelineTab() {
               className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all"
               style={
                 selectedDate === d
-                  ? { background: '#2C3639', color: '#DCD7C9' }
-                  : { background: 'rgba(44,54,57,0.07)', color: '#8a897e' }
+                  ? { background: '#4F46E5', color: '#FFFFFF' }
+                  : { background: '#FFFFFF', color: '#64748B', border: '1px solid #E2E8F0' }
               }
             >
               {KO ? DATE_LABELS[d].KO : DATE_LABELS[d].EN}
@@ -373,7 +373,7 @@ export function TimelineTab() {
           animate={{ opacity: 1, x: 0 }}
           className="mb-6 mt-2 px-1"
         >
-          <h1 className="text-xl font-black tracking-tight" style={{ color: '#2C3639' }}>
+          <h1 className="text-xl font-bold" style={{ color: '#0F172A' }}>
             {new Intl.DateTimeFormat(KO ? 'ko-KR' : 'en-US', {
               year: 'numeric',
               month: 'long',
@@ -381,7 +381,7 @@ export function TimelineTab() {
               weekday: 'long',
             }).format(new Date())}
           </h1>
-          <div className="w-8 h-1 rounded-full mt-1" style={{ background: '#A27B5C' }} />
+          <div className="w-8 h-1 rounded-full mt-1" style={{ background: '#4F46E5' }} />
         </motion.div>
 
 

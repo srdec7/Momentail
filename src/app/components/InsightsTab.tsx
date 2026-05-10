@@ -65,7 +65,7 @@ function runDogEngine(
     good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
     excellent: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '최상' : 'Excellent'}</span> 
   }[sleepStatus];
-  const sleepColor = { poor: '#E64A4A', good: '#3A9AB7', excellent: '#7450A6' }[sleepStatus];
+  const sleepColor = { poor: '#EF4444', good: '#0EA5E9', excellent: '#7C3AED' }[sleepStatus];
 
   // Diet
   const dietStatus = counts.meal === 0 ? 'emergency' : counts.meal === 1 ? 'low' : counts.meal === 2 ? 'good' : 'high';
@@ -75,7 +75,7 @@ function runDogEngine(
     good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
     high: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '충분' : 'High'}</span> 
   }[dietStatus];
-  const dietColor = { emergency: '#E64A4A', low: '#F27A3D', good: '#3E8E41', high: '#8B6D55' }[dietStatus];
+  const dietColor = { emergency: '#EF4444', low: '#F59E0B', good: '#10B981', high: '#7C3AED' }[dietStatus];
 
   // Activity
   const actStatus = counts.walk === 0 ? 'zero' : counts.walk === 1 ? 'low' : counts.walk === 2 ? 'good' : 'high';
@@ -85,7 +85,7 @@ function runDogEngine(
     good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
     high: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '활발' : 'Active'}</span> 
   }[actStatus];
-  const actColor = { zero: '#E64A4A', low: '#F27A3D', good: '#3E8E41', high: '#3A9AB7' }[actStatus];
+  const actColor = { zero: '#EF4444', low: '#F59E0B', good: '#10B981', high: '#0EA5E9' }[actStatus];
 
   // Wellness score
   const sleepScore = { poor: 25, good: 50, excellent: 100 }[sleepStatus];
@@ -391,7 +391,7 @@ export function InsightsTab() {
           onClick={runAnalysis}
           disabled={isLoading}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium"
-          style={{ background: 'rgba(44,54,57,0.08)', color: '#2C3639' }}
+          style={{ background: '#EEF2FF', color: '#4F46E5' }}
         >
           <RefreshCw size={12} style={{ animation: isLoading ? 'lpSpin 1s linear infinite' : 'none' }} />
           {KO ? '재분석' : 'Refresh'}
@@ -423,17 +423,17 @@ export function InsightsTab() {
               transition={{ delay: 0.1 }}
               className="rounded-3xl overflow-hidden mb-4"
               style={{
-                background: 'linear-gradient(145deg, #1a2426 0%, #2C3639 100%)',
-                boxShadow: '0 12px 40px rgba(44,54,57,0.35)',
+                background: 'linear-gradient(145deg, #4F46E5 0%, #7C3AED 100%)',
+                boxShadow: '0 12px 40px rgba(79,70,229,0.3)',
               }}
             >
               <div className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div
                     className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(162,123,92,0.2)' }}
+                    style={{ background: 'rgba(255,255,255,0.15)' }}
                   >
-                    <Zap size={22} style={{ color: '#A27B5C' }} />
+                    <Zap size={22} style={{ color: '#FBBF24' }} />
                   </div>
                   <div>
                     <p className="text-[12px] tracking-widest uppercase" style={{ color: '#6a6a66' }}>
@@ -462,7 +462,7 @@ export function InsightsTab() {
                     animate={{ width: `${result.wellnessScore}%` }}
                     transition={{ delay: 0.4, duration: 1, ease: 'easeOut' }}
                     className="h-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #A27B5C, #e8c99a)' }}
+                    style={{ background: 'linear-gradient(90deg, #FBBF24, #ffffff80)' }}
                   />
                 </div>
 
@@ -526,8 +526,8 @@ export function InsightsTab() {
             {/* ── Coaching Cards ── */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-2 ml-1">
-                <Lightbulb size={18} style={{ color: '#A27B5C' }} />
-                <p className="text-[15px] font-bold" style={{ color: '#1A2421' }}>
+                <Lightbulb size={18} style={{ color: '#4F46E5' }} />
+                <p className="text-[15px] font-semibold" style={{ color: '#0F172A' }}>
                   {KO ? '맞춤 코칭' : 'Personalized Coaching'}
                 </p>
               </div>
@@ -553,9 +553,9 @@ export function InsightsTab() {
                       {card.type === 'warning' && <AlertTriangle size={13} style={{ color: card.color }} />}
                       {card.type === 'good'    && <CheckCircle2  size={13} style={{ color: card.color }} />}
                       {card.type === 'info'    && <TrendingUp    size={13} style={{ color: card.color }} />}
-                      <p className="text-sm font-bold" style={{ color: '#2C3639' }}>{card.title}</p>
+                      <p className="text-sm font-semibold" style={{ color: '#0F172A' }}>{card.title}</p>
                     </div>
-                    <p className="text-[13px] leading-relaxed" style={{ color: '#5a5a52' }}>
+                    <p className="text-[13px] leading-relaxed" style={{ color: '#475569' }}>
                       {card.desc}
                     </p>
                   </div>

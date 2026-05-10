@@ -7,14 +7,14 @@ import { saveProfile } from '../../lib/api';
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function calcAgeMonths(birthdate: string): number {
   const [y, m] = birthdate.split('-').map(Number);
-  const now = new Date(2026, 4, 4); // May 4, 2026
+  const now = new Date(2026, 4, 4);
   return (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m);
 }
 
 function getGrowthStage(months: number, lang: 'KO' | 'EN') {
-  if (months < 12) return { label: lang === 'KO' ? '퍼피' : 'Puppy', color: '#00A8FF', bg: '#E1F5FE', emoji: '🐣' };
-  if (months < 84) return { label: lang === 'KO' ? '성견' : 'Adult', color: '#44BD32', bg: '#E8F5E9', emoji: '🐕' };
-  return { label: lang === 'KO' ? '노령견' : 'Senior', color: '#E1B12C', bg: '#FFF9C4', emoji: '🐾' };
+  if (months < 12) return { label: lang === 'KO' ? '퍼피' : 'Puppy', color: '#0EA5E9', bg: '#EFF6FF', emoji: '🐣' };
+  if (months < 84) return { label: lang === 'KO' ? '성견' : 'Adult', color: '#10B981', bg: '#ECFDF5', emoji: '🐕' };
+  return { label: lang === 'KO' ? '노령견' : 'Senior', color: '#F59E0B', bg: '#FFFBEB', emoji: '🐾' };
 }
 
 function formatDate(d: string) {
@@ -39,21 +39,32 @@ function BentoTile({ icon, label, value, sub, color, bg, delay = 0 }: TileProps)
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="rounded-2xl p-4 flex flex-col gap-2 shadow-[0_8px_20px_rgba(0,0,0,0.06)] border border-[rgba(0,0,0,0.03)]"
-      style={{ background: '#FFFFFF' }}
+      className="rounded-2xl p-4 flex flex-col gap-1.5"
+      style={{
+        background: '#FFFFFF',
+        boxShadow: '0 1px 4px rgba(15,23,42,0.08), 0 4px 16px rgba(15,23,42,0.04)',
+        border: '1px solid rgba(15,23,42,0.06)',
+      }}
     >
-      <div className="flex items-center gap-1.5">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: bg }}>
-           <span style={{ color }}>{icon}</span>
+      <div className="flex items-center gap-2">
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center"
+          style={{ background: bg }}
+        >
+          <span style={{ color, display: 'flex' }}>{icon}</span>
         </div>
-        <span className="text-[12px] font-extrabold uppercase tracking-widest" style={{ color: '#6A7670' }}>
+        <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#94A3B8' }}>
           {label}
         </span>
       </div>
-      <div className="text-[17px] font-black" style={{ color: '#0A1A14', lineHeight: 1.2 }}>
+      <div className="text-[16px] font-bold" style={{ color: '#0F172A', lineHeight: 1.3 }}>
         {value}
       </div>
-      {sub && <div className="text-[12px] font-bold" style={{ color: color }}>{sub}</div>}
+      {sub && (
+        <div className="text-[12px] font-medium" style={{ color }}>
+          {sub}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -77,7 +88,6 @@ export function ProfileTab() {
     ? (KO ? `${ageMonths}개월` : `${ageMonths}mo`)
     : (KO ? `${Math.floor(ageMonths / 12)}세 ${ageMonths % 12}개월` : `${Math.floor(ageMonths / 12)}y ${ageMonths % 12}m`);
 
-  // Open edit modal pre-filled with current pet
   const handleEditPet = () => {
     setEditingPet(pet);
     setShowPetFormModal(true);
@@ -103,20 +113,20 @@ export function ProfileTab() {
         transition={{ duration: 0.5 }}
         className="rounded-3xl overflow-hidden mb-4"
         style={{
-          background: 'linear-gradient(145deg, #2C3639 0%, #3F4E4F 100%)',
-          boxShadow: '0 12px 40px rgba(44,54,57,0.3)',
+          background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+          boxShadow: '0 8px 32px rgba(79,70,229,0.35)',
         }}
       >
         <div className="p-5">
           <div className="flex items-start gap-4">
-            {/* Avatar - tappable to edit */}
+            {/* Avatar */}
             <div className="relative">
               <button
                 onClick={handleEditPet}
                 className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 block"
                 style={{
-                  border: '2.5px solid rgba(162,123,92,0.5)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                  border: '3px solid rgba(255,255,255,0.3)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
                 }}
               >
                 <img
@@ -127,42 +137,37 @@ export function ProfileTab() {
               </button>
               <div
                 className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center shadow-lg"
-                style={{ background: 'linear-gradient(135deg, #A27B5C, #8b6347)', color: '#fff' }}
+                style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: '#fff' }}
               >
-                <Camera size={14} />
+                <Camera size={13} />
               </div>
             </div>
 
             {/* Info */}
             <div className="flex-1 pt-0.5">
-              {/* Name + Edit button */}
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-xl font-bold" style={{ color: '#DCD7C9' }}>
+                <h2 className="text-xl font-bold text-white">
                   {pet?.name}
                 </h2>
-                <button
-                  onClick={handleEditPet}
-                  style={{ color: 'rgba(220,215,201,0.45)' }}
-                >
+                <button onClick={handleEditPet} style={{ color: 'rgba(255,255,255,0.5)' }}>
                   <Edit2 size={13} />
                 </button>
               </div>
 
-              <p className="text-sm mb-2" style={{ color: 'rgba(220,215,201,0.55)' }}>
+              <p className="text-sm mb-2.5" style={{ color: 'rgba(255,255,255,0.65)' }}>
                 {pet?.breed || (lang === 'KO' ? '견종 미입력' : 'No breed set')}
               </p>
 
-              {/* Badges */}
               <div className="flex flex-wrap gap-1.5">
                 <span
-                  className="px-2 py-0.5 rounded-full text-[12px] font-semibold"
-                  style={{ background: stage.bg, color: stage.color }}
+                  className="px-2.5 py-1 rounded-full text-[12px] font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
                 >
-                  {stage.label}
+                  {stage.emoji} {stage.label}
                 </span>
                 <span
-                  className="px-2 py-0.5 rounded-full text-[12px] font-medium"
-                  style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(220,215,201,0.7)' }}
+                  className="px-2.5 py-1 rounded-full text-[12px] font-medium"
+                  style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}
                 >
                   {ageDisplay}
                 </span>
@@ -191,8 +196,8 @@ export function ProfileTab() {
               <span>{displayWeight}</span>
               <button
                 onClick={toggleUnit}
-                className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-medium"
-                style={{ background: 'rgba(162,123,92,0.15)', color: '#A27B5C' }}
+                className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-semibold"
+                style={{ background: '#EEF2FF', color: '#4F46E5' }}
               >
                 <RefreshCw size={8} />
                 {weightUnit === 'kg' ? 'lbs' : 'kg'}
@@ -200,16 +205,16 @@ export function ProfileTab() {
             </div>
           }
           sub={KO ? '정상 범위' : 'Normal range'}
-          color="#A27B5C"
-          bg="rgba(162,123,92,0.1)"
+          color="#4F46E5"
+          bg="#EEF2FF"
           delay={0.15}
         />
         <BentoTile
           icon={<Syringe size={14} />}
           label={KO ? '마지막 접종' : 'Last Vaccine'}
           value={formatDate(pet.lastVaccine)}
-          color="#9B7BC8"
-          bg="rgba(155,123,200,0.1)"
+          color="#7C3AED"
+          bg="#F5F3FF"
           delay={0.2}
         />
         <BentoTile
@@ -217,8 +222,8 @@ export function ProfileTab() {
           label={KO ? '다음 진료일' : 'Next Vet'}
           value={formatDate(pet.nextVet)}
           sub={KO ? '예약됨' : 'Scheduled'}
-          color="#5BAD6F"
-          bg="rgba(91,173,111,0.1)"
+          color="#10B981"
+          bg="#ECFDF5"
           delay={0.25}
         />
       </div>
@@ -229,23 +234,27 @@ export function ProfileTab() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
         className="rounded-2xl p-4 mb-4"
-        style={{ background: 'rgba(44,54,57,0.07)', border: '1px solid rgba(44,54,57,0.1)' }}
+        style={{
+          background: '#FFFFFF',
+          boxShadow: '0 1px 4px rgba(15,23,42,0.08)',
+          border: '1px solid rgba(15,23,42,0.06)',
+        }}
       >
-        <p className="text-sm font-semibold mb-3" style={{ color: '#2C3639' }}>
+        <p className="text-sm font-semibold mb-3" style={{ color: '#0F172A' }}>
           {KO ? '오늘의 건강 현황' : "Today's Health Overview"}
         </p>
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {[
-            { label: KO ? '수분 섭취' : 'Hydration', value: 70, color: '#7CB9E8' },
-            { label: KO ? '활동량' : 'Activity', value: 85, color: '#5BAD6F' },
-            { label: KO ? '수면 품질' : 'Sleep Quality', value: 92, color: '#9B7BC8' },
-          ].map(({ label, value, color }) => (
+            { label: KO ? '수분 섭취' : 'Hydration', value: 70, color: '#0EA5E9', track: '#E0F2FE' },
+            { label: KO ? '활동량' : 'Activity',    value: 85, color: '#10B981', track: '#D1FAE5' },
+            { label: KO ? '수면 품질' : 'Sleep Quality', value: 92, color: '#7C3AED', track: '#EDE9FE' },
+          ].map(({ label, value, color, track }) => (
             <div key={label}>
-              <div className="flex justify-between text-[12px] mb-1">
-                <span style={{ color: '#8a897e' }}>{label}</span>
-                <span style={{ color }} className="font-semibold">{value}%</span>
+              <div className="flex justify-between text-[12px] mb-1.5">
+                <span style={{ color: '#475569' }} className="font-medium">{label}</span>
+                <span style={{ color }} className="font-bold">{value}%</span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(44,54,57,0.1)' }}>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: track }}>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${value}%` }}
@@ -267,27 +276,27 @@ export function ProfileTab() {
           transition={{ delay: 0.45 }}
           className="rounded-2xl p-4"
           style={{
-            background: 'linear-gradient(135deg, #2C3639 0%, #3F4E4F 100%)',
-            boxShadow: '0 4px 20px rgba(44,54,57,0.2)',
+            background: 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',
+            boxShadow: '0 4px 20px rgba(15,23,42,0.2)',
           }}
         >
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-1.5 mb-1">
-                <Crown size={14} style={{ color: '#F4C430' }} />
-                <span className="text-sm font-bold" style={{ color: '#F4C430' }}>
+                <Crown size={14} style={{ color: '#FBBF24' }} />
+                <span className="text-sm font-bold" style={{ color: '#FBBF24' }}>
                   {KO ? '가디언 패밀리팩' : 'Guardian Family Pack'}
                 </span>
               </div>
-              <p className="text-[12px]" style={{ color: 'rgba(220,215,201,0.6)' }}>
+              <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 {KO ? '무제한 프로필 · 프리미엄 오디오 · VIP 리포트' : 'Unlimited profiles · Premium audio · VIP reports'}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-[13px] line-through" style={{ color: 'rgba(220,215,201,0.35)' }}>$9.99</span>
-                <span className="text-base font-bold" style={{ color: '#DCD7C9' }}>$4.99</span>
+                <span className="text-[13px] line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>$9.99</span>
+                <span className="text-base font-bold text-white">$4.99</span>
                 <span
                   className="text-[11px] px-1.5 py-0.5 rounded-full font-bold"
-                  style={{ background: '#A27B5C', color: '#fff' }}
+                  style={{ background: '#4F46E5', color: '#fff' }}
                 >
                   50% OFF
                 </span>
@@ -296,7 +305,7 @@ export function ProfileTab() {
             <button
               onClick={() => setShowPremiumModal(true)}
               className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-semibold"
-              style={{ background: 'linear-gradient(135deg, #A27B5C, #c49870)', color: '#fff' }}
+              style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', color: '#fff' }}
             >
               {KO ? '보기' : 'View'}
               <ChevronRight size={12} />
@@ -309,10 +318,10 @@ export function ProfileTab() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45 }}
           className="rounded-2xl p-4"
-          style={{ background: 'linear-gradient(135deg, #A27B5C 0%, #c49870 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' }}
         >
           <div className="flex items-center gap-2">
-            <Crown size={16} style={{ color: '#fff' }} />
+            <Crown size={16} style={{ color: '#FBBF24' }} />
             <div>
               <p className="text-sm font-bold text-white">
                 {KO ? '가디언 프리미엄 활성 중' : 'Guardian Premium Active'}
