@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useState, useEffect, useMemo, Component, ErrorInfo, ReactNode, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer } from 'lucide-react';
+import { useReactToPrint } from 'react-to-print';
 import { useApp, ActivityType } from '../App';
 import html2canvas from 'html2canvas';
 
@@ -311,10 +312,12 @@ export function InsightsTab() {
     }, 1600);
   };
  
-  const printReport = () => {
-    // Trigger native print synchronously.
-    window.print();
-  };
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const printReport = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: KO ? 'Petory_VIP_건강리포트' : 'Petory_VIP_Health_Report',
+  });
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
 
@@ -579,7 +582,7 @@ export function InsightsTab() {
               onClick={e => e.stopPropagation()}
             >
               {/* Report Content for PDF */}
-              <div id="vip-report-content" className="flex-1 flex flex-col bg-white min-h-0">
+              <div id="vip-report-content" ref={printRef} className="flex-1 flex flex-col bg-white min-h-0 print-container">
                 {/* Report Header */}
                 <div className="bg-[#2C3639] p-6 text-white shrink-0">
                   <div className="flex justify-between items-start mb-4">
