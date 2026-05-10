@@ -239,7 +239,15 @@ export default function App() {
         onLoadedMetadata={handleLoadedMetadata}
       />
       {/* ── Outer Wrapper (PC Background) ── */}
-      <div className="w-full min-h-screen bg-[#A29E91] flex justify-center">
+      <div 
+        className="w-full min-h-screen flex justify-center"
+        style={{ 
+          backgroundColor: '#A29E91',
+          backgroundImage: 'url("/pc-bg.png")',
+          backgroundRepeat: 'repeat',
+          backgroundSize: '400px'
+        }}
+      >
         {/* ── Main App Container (Mobile Frame on PC) ── */}
         <div
           className="w-full max-w-[480px] h-[100dvh] overflow-hidden flex flex-col relative shadow-2xl"
