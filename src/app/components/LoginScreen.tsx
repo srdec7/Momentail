@@ -126,7 +126,7 @@ export function LoginScreen({ onLogin }: Props) {
         </motion.button>
       </div>
       {/* ── Hero Section (Floating Logo Only) ── */}
-      <div className="relative z-10 flex flex-col items-center mt-2 sm:mt-8 mb-2 px-6 text-center">
+      <div className="relative z-10 flex flex-col items-center mt-0 sm:mt-8 mb-0 sm:mb-2 px-6 text-center">
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
@@ -143,7 +143,7 @@ export function LoginScreen({ onLogin }: Props) {
       </div>
 
       {/* ── Forest Glass Login Card ── */}
-      <div className="flex-1 flex flex-col justify-start px-5 relative z-10 pt-[105px] sm:pt-[140px]">
+      <div className="flex-1 flex flex-col justify-start px-5 relative z-10 pt-[85px] sm:pt-[140px]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
