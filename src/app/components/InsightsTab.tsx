@@ -350,14 +350,28 @@ export function InsightsTab() {
 
           // Draw the first page
           pdf.addImage(imgData, 'JPEG', margin, position, pdfImageWidth, pdfImageHeight);
+          
+          // Cover bottom margin with white rectangle
+          pdf.setFillColor(255, 255, 255);
+          pdf.rect(0, a4Height - margin, a4Width, margin, 'F');
+          
           heightLeft -= contentHeight;
 
           // Add extra pages if the content is longer than one A4 page
           while (heightLeft > 0) {
             position -= contentHeight; // Shift up by the printable area
             pdf.addPage();
+            
             // Start exactly at the top margin again
             pdf.addImage(imgData, 'JPEG', margin, position, pdfImageWidth, pdfImageHeight);
+            
+            // Cover top margin with white rectangle
+            pdf.setFillColor(255, 255, 255);
+            pdf.rect(0, 0, a4Width, margin, 'F');
+            
+            // Cover bottom margin with white rectangle
+            pdf.rect(0, a4Height - margin, a4Width, margin, 'F');
+            
             heightLeft -= contentHeight;
           }
           
