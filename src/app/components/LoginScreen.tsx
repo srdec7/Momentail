@@ -72,7 +72,7 @@ export function LoginScreen({ onLogin }: Props) {
     <div className="relative w-full h-full overflow-y-auto flex flex-col font-sans">
       {/* ── Background Layer ── */}
       <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 z-0 bg-cover bg-top bg-no-repeat"
         style={{ 
           backgroundImage: 'url("/bg-dogs.png")',
           backgroundColor: '#9FB198' // Sage green fallback
@@ -81,7 +81,7 @@ export function LoginScreen({ onLogin }: Props) {
       
       {/* Soft Nature Overlay */}
       <div 
-        className="fixed inset-0 z-0"
+        className="absolute inset-0 z-0"
         style={{ 
           background: 'linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.1) 100%)' 
         }}
