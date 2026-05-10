@@ -288,6 +288,7 @@ export function InsightsTab() {
   const ageMonths = useMemo(() => calcAgeMonths(pet?.birthdate || '2024-01'), [pet]);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [result, setResult] = useState<DogEngineResult | null>(null);
   const [showReport, setShowReport] = useState(false);
  
@@ -312,12 +313,70 @@ export function InsightsTab() {
     }, 1600);
   };
  
-  const printRef = useRef<HTMLDivElement>(null);
+  const printReport = async () => {
+    setIsPrinting(true);
+    try {
+      const element = document.getElementById('vip-report-content');
+      if (!element) throw new Error('Content not found');
 
-  const printReport = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: KO ? 'Petory_VIP_건강리포트' : 'Petory_VIP_Health_Report',
-  });
+      // Add a slight delay to ensure UI updates before freezing the main thread for canvas generation
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('vip-report-content');
+          if (clonedElement) {
+            clonedElement.style.height = 'auto';
+            clonedElement.style.overflow = 'visible';
+          }
+        }
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      const { jsPDF } = await import('jspdf');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+      const blob = pdf.output('blob');
+      const file = new File([blob], 'Petory_VIP_Health_Report.pdf', { type: 'application/pdf' });
+
+      // iOS Safari and Android Share Sheet support
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
+          files: [file]
+        });
+      } else {
+        // Fallback for desktop PC: Download the PDF directly
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Petory_VIP_Health_Report.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      }
+    } catch (err) {
+      console.error('PDF Generation/Share failed:', err);
+      alert(KO ? '리포트 생성 중 오류가 발생했습니다. 다시 시도해주세요.' : 'Failed to generate report. Please try again.');
+    } finally {
+      setIsPrinting(false);
+    }
+  };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
 
@@ -582,7 +641,7 @@ export function InsightsTab() {
               onClick={e => e.stopPropagation()}
             >
               {/* Report Content for PDF */}
-              <div id="vip-report-content" ref={printRef} className="flex-1 flex flex-col bg-white min-h-0 print-container">
+              <div id="vip-report-content" className="flex-1 flex flex-col bg-white min-h-0 print-container">
                 {/* Report Header */}
                 <div className="bg-[#2C3639] p-6 text-white shrink-0">
                   <div className="flex justify-between items-start mb-4">
@@ -696,10 +755,15 @@ export function InsightsTab() {
                 </button>
                 <button 
                   onClick={printReport}
+                  disabled={isPrinting}
                   className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2"
                 >
-                  <Printer size={16} />
-                  {KO ? '리포트 인쇄/PDF저장' : 'PRINT / SAVE PDF'}
+                  {isPrinting ? (
+                    <RefreshCw size={16} className="animate-spin" />
+                  ) : (
+                    <Printer size={16} />
+                  )}
+                  {KO ? (isPrinting ? 'PDF 생성중...' : '리포트 인쇄/PDF저장') : (isPrinting ? 'GENERATING...' : 'PRINT / SAVE PDF')}
                 </button>
               </div>
             </motion.div>
