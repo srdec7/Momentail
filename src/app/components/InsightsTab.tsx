@@ -333,24 +333,32 @@ export function InsightsTab() {
           });
           
           const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pageHeight = pdf.internal.pageSize.getHeight();
-          const imgProps = pdf.getImageProperties(imgData);
-          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+          const a4Width = pdf.internal.pageSize.getWidth();
+          const a4Height = pdf.internal.pageSize.getHeight();
           
-          let heightLeft = pdfHeight;
-          let position = 0;
+          // 12mm margins for top/bottom/left/right
+          const margin = 12;
+          const contentWidth = a4Width - (margin * 2);
+          const contentHeight = a4Height - (margin * 2);
+
+          const imgProps = pdf.getImageProperties(imgData);
+          const pdfImageWidth = contentWidth;
+          const pdfImageHeight = (imgProps.height * contentWidth) / imgProps.width;
+          
+          let heightLeft = pdfImageHeight;
+          let position = margin; // Top margin offset
 
           // Draw the first page
-          pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
-          heightLeft -= pageHeight;
+          pdf.addImage(imgData, 'JPEG', margin, position, pdfImageWidth, pdfImageHeight);
+          heightLeft -= contentHeight;
 
           // Add extra pages if the content is longer than one A4 page
           while (heightLeft > 0) {
-            position -= pageHeight;
+            position -= contentHeight; // Shift up by the printable area
             pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
-            heightLeft -= pageHeight;
+            // Start exactly at the top margin again
+            pdf.addImage(imgData, 'JPEG', margin, position, pdfImageWidth, pdfImageHeight);
+            heightLeft -= contentHeight;
           }
           
           const blob = pdf.output('blob');
@@ -662,9 +670,11 @@ export function InsightsTab() {
               style={{ maxHeight: '90vh' }}
               onClick={e => e.stopPropagation()}
             >
-              {/* Report Content for PDF */}
-              <div id="vip-report-content" className="flex-1 flex flex-col bg-white min-h-0 print-container overflow-y-auto petory-scroll">
-                {/* Report Header - Printer Friendly */}
+              {/* Scrollable Container (Constrained by 90vh) */}
+              <div className="flex-1 overflow-y-auto petory-scroll bg-white">
+                {/* Full-Height Content to Capture (Unconstrained) */}
+                <div id="vip-report-content" className="flex flex-col bg-white">
+                  {/* Report Header - Printer Friendly */}
                 <div className="bg-white border-b border-gray-100 p-6 shrink-0">
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -765,6 +775,7 @@ export function InsightsTab() {
                   </p>
                 </div>
               </div>
+                </div>
               </div>
  
               {/* Footer Actions */}
