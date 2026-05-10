@@ -287,7 +287,6 @@ export function InsightsTab() {
   const ageMonths = useMemo(() => calcAgeMonths(pet?.birthdate || '2024-01'), [pet]);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
   const [result, setResult] = useState<DogEngineResult | null>(null);
   const [showReport, setShowReport] = useState(false);
  
@@ -312,46 +311,9 @@ export function InsightsTab() {
     }, 1600);
   };
  
-  const printReport = async () => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
-    if (isMobile && navigator.share) {
-      setIsPrinting(true);
-      try {
-        const printContent = document.getElementById('vip-report-content');
-        if (!printContent) throw new Error("Content not found");
-        
-        // Use html2canvas to capture the report area
-        const canvas = await html2canvas(printContent, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff'
-        });
-        
-        canvas.toBlob(async (blob) => {
-          if (!blob) throw new Error("Blob creation failed");
-          const file = new File([blob], 'Petory_VIP_Report.png', { type: 'image/png' });
-          
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
-              files: [file]
-            });
-          } else {
-            // Fallback if sharing files is not supported
-            window.print();
-          }
-          setIsPrinting(false);
-        }, 'image/png');
-      } catch (err) {
-        console.error('Print/Share failed:', err);
-        window.print(); // Fallback
-        setIsPrinting(false);
-      }
-    } else {
-      // For PC, native print works flawlessly
-      window.print();
-    }
+  const printReport = () => {
+    // Trigger native print synchronously.
+    window.print();
   };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
@@ -376,7 +338,9 @@ export function InsightsTab() {
             {KO ? 'AI 인사이트' : 'AI Insights'}
           </h2>
           <p className="text-[12px]" style={{ color: '#8a897e' }}>
-            {KO ? '오늘 2026.05.04 · DogEngine v2' : 'Today May 4, 2026 · DogEngine v2'}
+            {KO 
+              ? `오늘 ${new Date().toISOString().split('T')[0].replace(/-/g, '.')} · DogEngine v2` 
+              : `Today ${new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date())} · DogEngine v2`}
           </p>
         </div>
         <motion.button
@@ -634,7 +598,7 @@ export function InsightsTab() {
                     </div>
                     <div>
                       <p className="opacity-50 text-[10px] uppercase font-bold">Date</p>
-                      <p className="font-semibold">2026.05.04</p>
+                      <p className="font-semibold">{new Date().toISOString().split('T')[0].replace(/-/g, '.')}</p>
                     </div>
                   </div>
                 </div>
@@ -729,15 +693,10 @@ export function InsightsTab() {
                 </button>
                 <button 
                   onClick={printReport}
-                  disabled={isPrinting}
                   className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2"
                 >
-                  {isPrinting ? (
-                    <RefreshCw size={16} className="animate-spin" />
-                  ) : (
-                    <Printer size={16} />
-                  )}
-                  {KO ? (isPrinting ? '처리중...' : '리포트 인쇄/공유') : (isPrinting ? 'PROCESSING...' : 'PRINT REPORT')}
+                  <Printer size={16} />
+                  {KO ? '리포트 인쇄/PDF저장' : 'PRINT / SAVE PDF'}
                 </button>
               </div>
             </motion.div>

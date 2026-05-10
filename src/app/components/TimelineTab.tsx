@@ -28,12 +28,15 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
   const [note, setNote] = useState('');
 
   const handleSave = async () => {
+    const today = new Date();
+    // Use local date string in YYYY-MM-DD to avoid timezone shifts
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const entry: TimelineEntry = {
       id: `t_${Date.now()}`,
       petId,
       type,
       time,
-      date: '2026-05-04',
+      date: todayStr,
       note,
     };
     
@@ -310,7 +313,10 @@ export function TimelineTab() {
   const [selectedDate, setSelectedDate] = useState<'today' | 'yesterday' | 'week'>('today');
 
   const pet = pets[selectedPetIdx] || pets[0];
-  const dateEntries = timeline.filter(e => e.petId === pet?.id && e.date === '2026-05-04');
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  
+  const dateEntries = timeline.filter(e => e.petId === pet?.id && e.date === todayStr);
   const activityCount = dateEntries.length;
 
   const DATE_LABELS = {
@@ -333,7 +339,7 @@ export function TimelineTab() {
               {KO ? '활동 타임라인' : 'Activity Timeline'}
             </h2>
             <p className="text-[12px]" style={{ color: '#94A3B8' }}>
-              {KO ? '2026.05.04' : 'May 4, 2026'} · {KO ? `${activityCount}개의 기록` : `${activityCount} activities`}
+              {KO ? todayStr.replace(/-/g, '.') : new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(today)} · {KO ? `${activityCount}개의 기록` : `${activityCount} activities`}
             </p>
           </div>
 

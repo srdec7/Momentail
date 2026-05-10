@@ -7,7 +7,7 @@ import { saveProfile } from '../../lib/api';
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function calcAgeMonths(birthdate: string): number {
   const [y, m] = birthdate.split('-').map(Number);
-  const now = new Date(2026, 4, 4);
+  const now = new Date();
   return (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m);
 }
 
