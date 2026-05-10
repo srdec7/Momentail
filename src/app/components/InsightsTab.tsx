@@ -311,54 +311,7 @@ export function InsightsTab() {
   };
  
   const printReport = () => {
-    const printContent = document.getElementById('vip-report-content');
-    if (!printContent) return;
-
-    // Create a hidden iframe
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.width = '0px';
-    iframe.style.height = '0px';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-
-    const doc = iframe.contentWindow?.document;
-    if (!doc) return;
-
-    // Gather all stylesheets to apply to the iframe
-    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-      .map(node => node.outerHTML)
-      .join('\n');
-
-    // Write content to iframe
-    doc.open();
-    doc.write(`
-      <html>
-        <head>
-          <title>Petory VIP Report</title>
-          ${styles}
-          <style>
-            /* Force white background and hide scrollbars for print */
-            body { background: white !important; margin: 0; padding: 0; }
-            #vip-report-content { width: 100% !important; max-width: none !important; }
-            .petory-scroll { overflow: visible !important; height: auto !important; }
-          </style>
-        </head>
-        <body>
-          ${printContent.outerHTML}
-        </body>
-      </html>
-    `);
-    doc.close();
-
-    // Focus and print after resources load
-    iframe.onload = () => {
-      setTimeout(() => {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-        setTimeout(() => document.body.removeChild(iframe), 1000);
-      }, 250);
-    };
+    window.print();
   };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
