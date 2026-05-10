@@ -73,18 +73,32 @@
   body * {
     visibility: hidden;
   }
-  #vip-report-content, #vip-report-content * {
+  
+  /* Critical iOS Safari Fix: remove strict tailwind container bounds during print */
+  html, body, #root, #root > div, .is-printing .overflow-hidden, .is-printing .h-\[100dvh\] {
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  .is-printing #vip-report-content, 
+  .is-printing #vip-report-content * {
     visibility: visible;
   }
-  #vip-report-content {
+  
+  .is-printing #vip-report-content {
     position: absolute;
     left: 0;
     top: 0;
     width: 100vw;
+    height: auto !important;
     margin: 0;
     padding: 0;
     background-color: white !important;
   }
+  
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;

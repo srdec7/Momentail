@@ -3,8 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer } from 'lucide-react';
 import { useApp, ActivityType } from '../App';
 import { SparklineChart } from './Charts';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 
 // ─── Error Boundary ────────────────────────────────────────────────────────────
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; errorMsg: string }> {
@@ -289,7 +287,6 @@ export function InsightsTab() {
   const ageMonths = useMemo(() => calcAgeMonths(pet?.birthdate || '2024-01'), [pet]);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
   const [result, setResult] = useState<DogEngineResult | null>(null);
   const [showReport, setShowReport] = useState(false);
  
@@ -314,66 +311,15 @@ export function InsightsTab() {
     }, 1600);
   };
  
-  const printReport = async () => {
-    setIsPrinting(true);
-    try {
-      const element = document.getElementById('vip-report-content');
-      if (!element) throw new Error('Content not found');
-
-      // Add a slight delay to ensure UI updates before freezing the main thread for canvas generation
-      await new Promise(resolve => setTimeout(resolve, 50));
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        onclone: (clonedDoc) => {
-          const clonedElement = clonedDoc.getElementById('vip-report-content');
-          if (clonedElement) {
-            clonedElement.style.height = 'auto';
-            clonedElement.style.overflow = 'visible';
-          }
-        }
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      
-      const downloadFallback = () => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'Petory_VIP_Health_Report.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 100);
-      };
-
-      // iOS Safari and Android Share Sheet support
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
-            files: [file]
-          });
-        } catch (shareError: any) {
-          console.warn('Share aborted or failed, falling back to download:', shareError);
-          // If user gesture expired (NotAllowedError) or aborted, fallback to download
-          if (shareError.name !== 'AbortError') {
-            downloadFallback();
-          }
-        }
-      } else {
-        // Fallback for desktop PC: Download the PDF directly
-        downloadFallback();
-      }
-    } catch (err: any) {
-      console.error('PDF Generation failed:', err);
-      alert(KO ? `리포트 생성 오류: ${err.message}` : `Error: ${err.message}`);
-    } finally {
-      setIsPrinting(false);
-    }
+  const printReport = () => {
+    // Add class to body to trigger specific iOS Safari print overrides in index.css
+    document.body.classList.add('is-printing');
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => {
+        document.body.classList.remove('is-printing');
+      }, 1000);
+    }, 50);
   };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
@@ -753,15 +699,10 @@ export function InsightsTab() {
                 </button>
                 <button 
                   onClick={printReport}
-                  disabled={isPrinting}
                   className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2"
                 >
-                  {isPrinting ? (
-                    <RefreshCw size={16} className="animate-spin" />
-                  ) : (
-                    <Printer size={16} />
-                  )}
-                  {KO ? (isPrinting ? 'PDF 생성중...' : '리포트 인쇄/PDF저장') : (isPrinting ? 'GENERATING...' : 'PRINT / SAVE PDF')}
+                  <Printer size={16} />
+                  {KO ? '와이파이 인쇄 / PDF 저장' : 'PRINT / SAVE PDF'}
                 </button>
               </div>
             </motion.div>
