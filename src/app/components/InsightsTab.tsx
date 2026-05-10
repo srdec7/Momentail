@@ -334,10 +334,25 @@ export function InsightsTab() {
           
           const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
           const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
           const imgProps = pdf.getImageProperties(imgData);
           const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
           
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          let heightLeft = pdfHeight;
+          let position = 0;
+
+          // Draw the first page
+          pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+          heightLeft -= pageHeight;
+
+          // Add extra pages if the content is longer than one A4 page
+          while (heightLeft > 0) {
+            position -= pageHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pageHeight;
+          }
+          
           const blob = pdf.output('blob');
           const file = new File([blob], 'Petory_VIP_Health_Report.pdf', { type: 'application/pdf' });
           
@@ -648,32 +663,32 @@ export function InsightsTab() {
               onClick={e => e.stopPropagation()}
             >
               {/* Report Content for PDF */}
-              <div id="vip-report-content" className="flex-1 flex flex-col bg-white min-h-0 print-container">
-                {/* Report Header */}
-                <div className="bg-[#2C3639] p-6 text-white shrink-0">
+              <div id="vip-report-content" className="flex-1 flex flex-col bg-white min-h-0 print-container overflow-y-auto petory-scroll">
+                {/* Report Header - Printer Friendly */}
+                <div className="bg-white border-b border-gray-100 p-6 shrink-0">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-xl font-bold mb-1">ACTIVITY SUMMARY</h3>
-                      <p className="text-[11px] opacity-60 tracking-widest uppercase">Petory DogEngine v2.4 System Record</p>
+                      <h3 className="text-xl font-bold mb-1 text-[#2C3639]">ACTIVITY SUMMARY</h3>
+                      <p className="text-[11px] text-gray-400 tracking-widest uppercase">Petory DogEngine v2.4 System Record</p>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                    <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">
                       <Zap size={24} className="text-[#A27B5C]" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="opacity-50 text-[10px] uppercase font-bold">Patient</p>
-                      <p className="font-semibold">{pet.name}</p>
+                      <p className="text-gray-400 text-[10px] uppercase font-bold">Patient</p>
+                      <p className="font-semibold text-[#2C3639]">{pet.name}</p>
                     </div>
                     <div>
-                      <p className="opacity-50 text-[10px] uppercase font-bold">Date</p>
-                      <p className="font-semibold">{new Date().toISOString().split('T')[0].replace(/-/g, '.')}</p>
+                      <p className="text-gray-400 text-[10px] uppercase font-bold">Date</p>
+                      <p className="font-semibold text-[#2C3639]">{new Date().toISOString().split('T')[0].replace(/-/g, '.')}</p>
                     </div>
                   </div>
                 </div>
    
                 {/* Report Body */}
-                <div className="flex-1 overflow-y-auto p-6 petory-scroll">
+                <div className="p-6">
                   <section className="mb-6">
                   <h4 className="text-[12px] font-bold text-[#8a897e] uppercase mb-3 pb-1 border-b border-[rgba(0,0,0,0.05)]">Summary Analysis</h4>
                   <p className="text-lg font-serif italic text-[#2C3639] leading-relaxed">
