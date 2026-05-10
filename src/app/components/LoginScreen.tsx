@@ -126,13 +126,13 @@ export function LoginScreen({ onLogin }: Props) {
         </motion.button>
       </div>
       {/* ── Hero Section (Floating Logo Only) ── */}
-      <div className="relative z-10 flex flex-col items-center mt-2 mb-2 px-6 text-center">
+      <div className="relative z-10 flex flex-col items-center mt-8 mb-2 px-6 text-center">
         <motion.div
           animate={{ y: [0, -8, 0] }}
           transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
           className="mb-1"
         >
-          <div className="w-20 h-20 flex items-center justify-center overflow-hidden">
+          <div className="w-30 h-30 flex items-center justify-center overflow-hidden">
             <img 
               src="/logo.png" 
               alt="Momentail Logo" 
@@ -143,7 +143,7 @@ export function LoginScreen({ onLogin }: Props) {
       </div>
 
       {/* ── Forest Glass Login Card ── */}
-      <div className="flex-1 flex flex-col justify-start px-5 relative z-10 pt-[110px]">
+      <div className="flex-1 flex flex-col justify-start px-5 relative z-10 pt-[140px]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
