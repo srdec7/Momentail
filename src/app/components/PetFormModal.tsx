@@ -182,7 +182,7 @@ export function PetFormModal() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col justify-end overflow-hidden"
+      className="absolute inset-0 z-50 flex flex-col justify-end overflow-hidden"
       style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}
       onClick={handleClose}
     >
@@ -191,7 +191,7 @@ export function PetFormModal() {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-        className="w-full max-w-full rounded-t-3xl overflow-hidden flex flex-col"
+        className="w-full rounded-t-3xl overflow-hidden flex flex-col"
         style={{ background: '#EAE6DC', maxHeight: '92%' }}
         onClick={e => e.stopPropagation()}
       >
