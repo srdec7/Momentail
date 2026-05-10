@@ -6,13 +6,13 @@ import { addTimelineEntry, updateTimelineEntry, deleteTimelineEntry } from '../.
 
 // ─── Activity Config ───────────────────────────────────────────────────────────
 const ACTIVITY_CONFIG: Record<ActivityType, { icon: React.ReactNode; labelKO: string; labelEN: string; color: string; bg: string }> = {
-  meal:    { icon: <Utensils size={20} />,      labelKO: '식사',   labelEN: 'Meal',    color: '#E88B5B', bg: 'rgba(232,139,91,0.15)'  },
-  walk:    { icon: <Footprints size={20} />,    labelKO: '산책',   labelEN: 'Walk',    color: '#5BAD6F', bg: 'rgba(91,173,111,0.15)'  },
-  sleep:   { icon: <Moon size={20} />,          labelKO: '수면',   labelEN: 'Sleep',   color: '#9B7BC8', bg: 'rgba(155,123,200,0.15)' },
-  toilet:  { icon: <Droplets size={20} />,      labelKO: '배변',   labelEN: 'Toilet',  color: '#7CB9E8', bg: 'rgba(124,185,232,0.15)' },
-  vet:     { icon: <Stethoscope size={20} />,   labelKO: '병원',   labelEN: 'Vet',     color: '#E87B7B', bg: 'rgba(232,123,123,0.15)' },
-  bath:    { icon: <Bath size={20} />,          labelKO: '목욕',   labelEN: 'Bath',    color: '#78C8D8', bg: 'rgba(120,200,216,0.15)' },
-  other:   { icon: <Tag size={20} />,           labelKO: '기타',   labelEN: 'Other',   color: '#A27B5C', bg: 'rgba(162,123,92,0.15)'  },
+  meal:    { icon: <Utensils size={20} />,      labelKO: '식사',   labelEN: 'Meal',    color: '#F27A3D', bg: 'rgba(242,122,61,0.12)'  },
+  walk:    { icon: <Footprints size={20} />,    labelKO: '산책',   labelEN: 'Walk',    color: '#3E8E41', bg: 'rgba(62,142,65,0.12)'  },
+  sleep:   { icon: <Moon size={20} />,          labelKO: '수면',   labelEN: 'Sleep',   color: '#7450A6', bg: 'rgba(116,80,166,0.12)' },
+  toilet:  { icon: <Droplets size={20} />,      labelKO: '배변',   labelEN: 'Toilet',  color: '#3A9AB7', bg: 'rgba(58,154,183,0.12)' },
+  vet:     { icon: <Stethoscope size={20} />,   labelKO: '병원',   labelEN: 'Vet',     color: '#E64A4A', bg: 'rgba(230,74,74,0.12)' },
+  bath:    { icon: <Bath size={20} />,          labelKO: '목욕',   labelEN: 'Bath',    color: '#47A1B0', bg: 'rgba(71,161,176,0.12)' },
+  other:   { icon: <Tag size={20} />,           labelKO: '기타',   labelEN: 'Other',   color: '#8B6D55', bg: 'rgba(139,109,85,0.12)'  },
 };
 
 // ─── Add Activity Modal (inline bottom sheet) ─────────────────────────────────
@@ -72,7 +72,7 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
         {/* Drag handle */}
         <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ background: 'rgba(44,54,57,0.2)' }} />
 
-        <h3 className="text-sm font-bold mb-4" style={{ color: '#2C3639' }}>
+        <h3 className="text-sm font-bold mb-4" style={{ color: '#1A2421' }}>
           {KO ? '활동 기록 추가' : 'Add Activity'}
         </h3>
 

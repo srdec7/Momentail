@@ -15,11 +15,11 @@ function MusicBar() {
   return (
     <button
       onClick={() => setShowAudioModal(true)}
-      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all shadow-sm border border-[rgba(0,0,0,0.05)]"
+      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all shadow-sm border border-[rgba(0,0,0,0.08)]"
       style={{ background: '#fff' }}
     >
-      <Music size={14} style={{ color: isAudioPlaying ? '#A27B5C' : '#2C3639' }} />
-      <span className="text-[12px] font-bold" style={{ color: '#2C3639' }}>
+      <Music size={14} style={{ color: isAudioPlaying ? '#3E6D52' : '#1A2421' }} />
+      <span className="text-[12px] font-bold" style={{ color: '#1A2421' }}>
         {lang === 'KO' ? '플레이리스트' : 'Playlist'}
       </span>
       {isAudioPlaying && (
@@ -28,7 +28,7 @@ function MusicBar() {
             <span
               key={i}
               className={`block rounded-full music-bar-${i}`}
-              style={{ width: 2, height: 12, background: '#A27B5C', transformOrigin: 'bottom' }}
+              style={{ width: 2, height: 12, background: '#3E6D52', transformOrigin: 'bottom' }}
             />
           ))}
         </div>
@@ -58,26 +58,26 @@ function PetDropdown() {
       <button
         onClick={() => setShowProfileDropdown(!showProfileDropdown)}
         className="flex items-center gap-2 rounded-2xl px-2 py-1.5 transition-all"
-        style={{ background: showProfileDropdown ? 'rgba(44,54,57,0.1)' : 'transparent' }}
+        style={{ background: showProfileDropdown ? 'rgba(26,36,33,0.1)' : 'transparent' }}
       >
         <div
           className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0"
-          style={{ border: '2px solid rgba(162,123,92,0.4)' }}
+          style={{ border: '2px solid rgba(62,109,82,0.4)' }}
         >
           <img src={current.photo} alt={current.name} className="w-full h-full object-cover" />
         </div>
         <div className="text-left min-w-0 max-w-[80px]">
-          <p className="text-sm font-semibold leading-tight truncate" style={{ color: '#2C3639' }}>
+          <p className="text-sm font-semibold leading-tight truncate" style={{ color: '#1A2421' }}>
             {current.name}
           </p>
-          <p className="text-[11px] leading-tight truncate" style={{ color: '#8a897e' }}>
+          <p className="text-[11px] leading-tight truncate" style={{ color: '#5C6B64' }}>
             {current.breed}
           </p>
         </div>
         <ChevronDown
           size={14}
           style={{
-            color: '#8a897e',
+            color: '#5C6B64',
             transform: showProfileDropdown ? 'rotate(180deg)' : 'rotate(0)',
             transition: 'transform 0.2s',
           }}
@@ -269,48 +269,45 @@ export function MainShell() {
       </div>
 
       {/* ── Bottom Nav ── */}
-      <div
-        className="flex-shrink-0 flex items-center justify-around"
-        style={{
-          height: 76,
-          paddingBottom: 8,
-          background: 'rgba(220,215,201,0.92)',
-          backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(44,54,57,0.08)',
-          zIndex: 30,
-        }}
-      >
-        {NAV_ITEMS.map(item => {
-          const active = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
-              className="flex flex-col items-center gap-1 px-6 py-1.5 rounded-2xl transition-all relative"
-              style={{ color: active ? '#A27B5C' : '#8a897e' }}
-            >
-              <motion.div
-                animate={{ scale: active ? 1.1 : 1 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+      <div className="relative z-20 pb-8 pt-4 px-6 mt-auto">
+        <div
+          className="flex items-center justify-around rounded-[32px] py-3.5 shadow-xl border border-[rgba(255,255,255,0.4)]"
+          style={{
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(20px)',
+          }}
+        >
+          {NAV_ITEMS.map(item => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id as any)}
+                className="flex flex-col items-center gap-1 relative px-4"
               >
-                {item.icon}
-              </motion.div>
-              <span
-                className="text-[11px] font-medium leading-none"
-                style={{ color: active ? '#A27B5C' : '#8a897e' }}
-              >
-                {KO ? item.labelKO : item.labelEN}
-              </span>
-              {active && (
-                <motion.div
-                  layoutId="navDot"
-                  className="w-1 h-1 rounded-full"
-                  style={{ background: '#A27B5C' }}
-                />
-              )}
-            </button>
-          );
-        })}
+                <div
+                  className="transition-all duration-300"
+                  style={{ color: isActive ? '#3E6D52' : '#8a8e8b' }}
+                >
+                  {item.icon}
+                </div>
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wider"
+                  style={{ color: isActive ? '#3E6D52' : '#8a8e8b' }}
+                >
+                  {KO ? item.labelKO : item.labelEN}
+                </span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute -bottom-1 w-1 h-1 rounded-full"
+                    style={{ background: '#3E6D52' }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

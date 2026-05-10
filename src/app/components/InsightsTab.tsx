@@ -65,7 +65,7 @@ function runDogEngine(
     good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
     excellent: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '최상' : 'Excellent'}</span> 
   }[sleepStatus];
-  const sleepColor = { poor: '#E87B7B', good: '#7CB9E8', excellent: '#9B7BC8' }[sleepStatus];
+  const sleepColor = { poor: '#E64A4A', good: '#3A9AB7', excellent: '#7450A6' }[sleepStatus];
 
   // Diet
   const dietStatus = counts.meal === 0 ? 'emergency' : counts.meal === 1 ? 'low' : counts.meal === 2 ? 'good' : 'high';
@@ -75,7 +75,7 @@ function runDogEngine(
     good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
     high: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '충분' : 'High'}</span> 
   }[dietStatus];
-  const dietColor = { emergency: '#E87B7B', low: '#E8B35B', good: '#5BAD6F', high: '#A27B5C' }[dietStatus];
+  const dietColor = { emergency: '#E64A4A', low: '#F27A3D', good: '#3E8E41', high: '#8B6D55' }[dietStatus];
 
   // Activity
   const actStatus = counts.walk === 0 ? 'zero' : counts.walk === 1 ? 'low' : counts.walk === 2 ? 'good' : 'high';
@@ -85,7 +85,7 @@ function runDogEngine(
     good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
     high: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '활발' : 'Active'}</span> 
   }[actStatus];
-  const actColor = { zero: '#E87B7B', low: '#E8B35B', good: '#5BAD6F', high: '#78C8D8' }[actStatus];
+  const actColor = { zero: '#E64A4A', low: '#F27A3D', good: '#3E8E41', high: '#3A9AB7' }[actStatus];
 
   // Wellness score
   const sleepScore = { poor: 25, good: 50, excellent: 100 }[sleepStatus];

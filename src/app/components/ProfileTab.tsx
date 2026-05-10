@@ -12,9 +12,9 @@ function calcAgeMonths(birthdate: string): number {
 }
 
 function getGrowthStage(months: number, lang: 'KO' | 'EN') {
-  if (months < 12) return { label: lang === 'KO' ? '퍼피' : 'Puppy', color: '#7CB9E8', bg: 'rgba(124,185,232,0.15)', emoji: '🐣' };
-  if (months < 84) return { label: lang === 'KO' ? '성견' : 'Adult', color: '#5BAD6F', bg: 'rgba(91,173,111,0.15)', emoji: '🐕' };
-  return { label: lang === 'KO' ? '노령견' : 'Senior', color: '#C4956A', bg: 'rgba(196,149,106,0.15)', emoji: '🐾' };
+  if (months < 12) return { label: lang === 'KO' ? '퍼피' : 'Puppy', color: '#3A9AB7', bg: 'rgba(58,154,183,0.12)', emoji: '🐣' };
+  if (months < 84) return { label: lang === 'KO' ? '성견' : 'Adult', color: '#45B649', bg: 'rgba(69,182,73,0.12)', emoji: '🐕' };
+  return { label: lang === 'KO' ? '노령견' : 'Senior', color: '#D4A373', bg: 'rgba(212,163,115,0.12)', emoji: '🐾' };
 }
 
 function formatDate(d: string) {
@@ -39,19 +39,19 @@ function BentoTile({ icon, label, value, sub, color, bg, delay = 0 }: TileProps)
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="rounded-2xl p-4 flex flex-col gap-2"
-      style={{ background: bg, border: `1px solid ${color}22` }}
+      className="rounded-2xl p-4 flex flex-col gap-2 shadow-sm border border-[rgba(255,255,255,0.4)]"
+      style={{ background: bg }}
     >
       <div className="flex items-center gap-1.5">
         <span style={{ color }}>{icon}</span>
-        <span className="text-[12px] font-medium uppercase tracking-wide" style={{ color: '#8a897e' }}>
+        <span className="text-[12px] font-bold uppercase tracking-wide" style={{ color: '#5C6B64' }}>
           {label}
         </span>
       </div>
-      <div className="text-base font-semibold" style={{ color: '#2C3639', lineHeight: 1.2 }}>
+      <div className="text-base font-bold" style={{ color: '#1A2421', lineHeight: 1.2 }}>
         {value}
       </div>
-      {sub && <div className="text-[12px]" style={{ color: '#8a897e' }}>{sub}</div>}
+      {sub && <div className="text-[12px] font-medium" style={{ color: '#5C6B64' }}>{sub}</div>}
     </motion.div>
   );
 }
