@@ -391,7 +391,7 @@ export function InsightsTab() {
           onClick={runAnalysis}
           disabled={isLoading}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium"
-          style={{ background: '#EEF2FF', color: '#4F46E5' }}
+          style={{ background: '#EDF5F0', color: '#3E6D52' }}
         >
           <RefreshCw size={12} style={{ animation: isLoading ? 'lpSpin 1s linear infinite' : 'none' }} />
           {KO ? '재분석' : 'Refresh'}
@@ -423,8 +423,8 @@ export function InsightsTab() {
               transition={{ delay: 0.1 }}
               className="rounded-3xl overflow-hidden mb-4"
               style={{
-                background: 'linear-gradient(145deg, #4F46E5 0%, #7C3AED 100%)',
-                boxShadow: '0 12px 40px rgba(79,70,229,0.3)',
+                background: 'linear-gradient(145deg, #2C3E35 0%, #3E6D52 100%)',
+                boxShadow: '0 12px 40px rgba(44,62,53,0.3)',
               }}
             >
               <div className="p-5">
@@ -433,7 +433,7 @@ export function InsightsTab() {
                     className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
                     style={{ background: 'rgba(255,255,255,0.15)' }}
                   >
-                    <Zap size={22} style={{ color: '#FBBF24' }} />
+                    <Zap size={22} style={{ color: '#F4C430' }} />
                   </div>
                   <div>
                     <p className="text-[12px] tracking-widest uppercase" style={{ color: '#6a6a66' }}>
@@ -462,7 +462,7 @@ export function InsightsTab() {
                     animate={{ width: `${result.wellnessScore}%` }}
                     transition={{ delay: 0.4, duration: 1, ease: 'easeOut' }}
                     className="h-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #FBBF24, #ffffff80)' }}
+                    style={{ background: 'linear-gradient(90deg, #A27B5C, #c9a07a)' }}
                   />
                 </div>
 
@@ -526,8 +526,8 @@ export function InsightsTab() {
             {/* ── Coaching Cards ── */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-2 ml-1">
-                <Lightbulb size={18} style={{ color: '#4F46E5' }} />
-                <p className="text-[15px] font-semibold" style={{ color: '#0F172A' }}>
+                <Lightbulb size={18} style={{ color: '#3E6D52' }} />
+                <p className="text-[15px] font-semibold" style={{ color: '#1A2421' }}>
                   {KO ? '맞춤 코칭' : 'Personalized Coaching'}
                 </p>
               </div>

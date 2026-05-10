@@ -293,7 +293,7 @@ export function MainShell() {
                 </div>
                 <span
                   className="text-[10px] font-bold uppercase tracking-wider"
-                  style={{ color: isActive ? '#4F46E5' : '#94A3B8' }}
+                  style={{ color: isActive ? '#3E6D52' : '#8A9E96' }}
                 >
                   {KO ? item.labelKO : item.labelEN}
                 </span>
@@ -301,7 +301,7 @@ export function MainShell() {
                   <motion.div
                     layoutId="activeTab"
                     className="absolute -bottom-1 w-1 h-1 rounded-full"
-                    style={{ background: '#4F46E5' }}
+                    style={{ background: '#3E6D52' }}
                   />
                 )}
               </button>

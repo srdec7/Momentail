@@ -252,7 +252,7 @@ export default function App() {
         <div
           className="w-full max-w-[480px] h-[100dvh] overflow-hidden flex flex-col relative shadow-2xl"
           style={{
-            background: '#F0F2F5',
+            background: '#F5F3EE',
           }}
         >
           {!user ? (

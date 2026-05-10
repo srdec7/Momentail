@@ -7,12 +7,12 @@ import { addTimelineEntry, updateTimelineEntry, deleteTimelineEntry } from '../.
 // ─── Activity Config ───────────────────────────────────────────────────────────
 const ACTIVITY_CONFIG: Record<ActivityType, { icon: React.ReactNode; labelKO: string; labelEN: string; color: string; bg: string }> = {
   meal:    { icon: <Utensils size={20} />,      labelKO: '식사',   labelEN: 'Meal',    color: '#F59E0B', bg: '#FFFBEB'  },
-  walk:    { icon: <Footprints size={20} />,    labelKO: '산책',   labelEN: 'Walk',    color: '#10B981', bg: '#ECFDF5'  },
-  sleep:   { icon: <Moon size={20} />,          labelKO: '수면',   labelEN: 'Sleep',   color: '#7C3AED', bg: '#F5F3FF' },
+  walk:    { icon: <Footprints size={20} />,    labelKO: '산책',   labelEN: 'Walk',    color: '#3E6D52', bg: '#EDF5F0'  },
+  sleep:   { icon: <Moon size={20} />,          labelKO: '수면',   labelEN: 'Sleep',   color: '#6B7FBF', bg: '#EEF0F8' },
   toilet:  { icon: <Droplets size={20} />,      labelKO: '배변',   labelEN: 'Toilet',  color: '#0EA5E9', bg: '#F0F9FF' },
   vet:     { icon: <Stethoscope size={20} />,   labelKO: '병원',   labelEN: 'Vet',     color: '#EF4444', bg: '#FEF2F2' },
   bath:    { icon: <Bath size={20} />,          labelKO: '목욕',   labelEN: 'Bath',    color: '#06B6D4', bg: '#ECFEFF' },
-  other:   { icon: <Tag size={20} />,           labelKO: '기타',   labelEN: 'Other',   color: '#64748B', bg: '#F8FAFC'  },
+  other:   { icon: <Tag size={20} />,           labelKO: '기타',   labelEN: 'Other',   color: '#A27B5C', bg: '#FDF6EE'  },
 };
 
 // ─── Add Activity Modal (inline bottom sheet) ─────────────────────────────────
@@ -140,7 +140,7 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
           <button
             onClick={handleSave}
             className="flex-1 py-3 rounded-xl text-base font-semibold text-white"
-            style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)' }}
+            style={{ background: 'linear-gradient(135deg, #3E6D52, #5a9970)' }}
           >
             {KO ? '저장' : 'Save'}
           </button>
@@ -342,7 +342,7 @@ export function TimelineTab() {
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold"
-            style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', color: '#fff' }}
+            style={{ background: 'linear-gradient(135deg, #3E6D52, #5a9970)', color: '#fff' }}
           >
             <Plus size={14} strokeWidth={2.5} />
             {KO ? '기록 추가' : 'Add'}
@@ -358,8 +358,8 @@ export function TimelineTab() {
               className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all"
               style={
                 selectedDate === d
-                  ? { background: '#4F46E5', color: '#FFFFFF' }
-                  : { background: '#FFFFFF', color: '#64748B', border: '1px solid #E2E8F0' }
+                  ? { background: '#3E6D52', color: '#FFFFFF' }
+                  : { background: '#FFFFFF', color: '#4A5E58', border: '1px solid rgba(62,109,82,0.2)' }
               }
             >
               {KO ? DATE_LABELS[d].KO : DATE_LABELS[d].EN}
@@ -381,7 +381,7 @@ export function TimelineTab() {
               weekday: 'long',
             }).format(new Date())}
           </h1>
-          <div className="w-8 h-1 rounded-full mt-1" style={{ background: '#4F46E5' }} />
+          <div className="w-8 h-1 rounded-full mt-1" style={{ background: '#3E6D52' }} />
         </motion.div>
 
 
