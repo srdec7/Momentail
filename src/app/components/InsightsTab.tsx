@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, Component, ErrorInfo, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { RefreshCw, TrendingUp, AlertTriangle, CheckCircle2, Zap, Moon, Utensils, Activity as ActivityIcon, AlertCircle, Check, XCircle, Lightbulb, Star } from 'lucide-react';
+import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer } from 'lucide-react';
 import { useApp, ActivityType } from '../App';
+import html2canvas from 'html2canvas';
 
 // ─── Error Boundary ────────────────────────────────────────────────────────────
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; errorMsg: string }> {
@@ -62,28 +63,28 @@ function runDogEngine(
   const sleepStatus = counts.sleep === 0 ? 'poor' : counts.sleep === 1 ? 'good' : 'excellent';
   const sleepLabel = { 
     poor: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '부족' : 'Poor'}</span>, 
-    good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
-    excellent: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '최상' : 'Excellent'}</span> 
+    good: <span className="flex items-center justify-center gap-1"><CheckCircle2 size={12}/> {KO ? '양호' : 'Good'}</span>, 
+    excellent: <span className="flex items-center justify-center gap-1"><Heart size={12}/> {KO ? '최상' : 'Excellent'}</span> 
   }[sleepStatus];
   const sleepColor = { poor: '#EF4444', good: '#0EA5E9', excellent: '#7C3AED' }[sleepStatus];
 
   // Diet
   const dietStatus = counts.meal === 0 ? 'emergency' : counts.meal === 1 ? 'low' : counts.meal === 2 ? 'good' : 'high';
   const dietLabel = { 
-    emergency: <span className="flex items-center justify-center gap-1"><AlertCircle size={12}/> {KO ? '긴급' : 'Emergency'}</span>, 
+    emergency: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '긴급' : 'Emergency'}</span>, 
     low: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '부족' : 'Low'}</span>, 
-    good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
-    high: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '충분' : 'High'}</span> 
+    good: <span className="flex items-center justify-center gap-1"><CheckCircle2 size={12}/> {KO ? '양호' : 'Good'}</span>, 
+    high: <span className="flex items-center justify-center gap-1"><Heart size={12}/> {KO ? '충분' : 'High'}</span> 
   }[dietStatus];
   const dietColor = { emergency: '#EF4444', low: '#F59E0B', good: '#10B981', high: '#7C3AED' }[dietStatus];
 
   // Activity
   const actStatus = counts.walk === 0 ? 'zero' : counts.walk === 1 ? 'low' : counts.walk === 2 ? 'good' : 'high';
   const actLabel = { 
-    zero: <span className="flex items-center justify-center gap-1"><XCircle size={12}/> {KO ? '없음' : 'None'}</span>, 
+    zero: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '없음' : 'None'}</span>, 
     low: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '부족' : 'Low'}</span>, 
-    good: <span className="flex items-center justify-center gap-1"><Check size={12}/> {KO ? '양호' : 'Good'}</span>, 
-    high: <span className="flex items-center justify-center gap-1"><Star size={12}/> {KO ? '활발' : 'Active'}</span> 
+    good: <span className="flex items-center justify-center gap-1"><CheckCircle2 size={12}/> {KO ? '양호' : 'Good'}</span>, 
+    high: <span className="flex items-center justify-center gap-1"><Heart size={12}/> {KO ? '활발' : 'Active'}</span> 
   }[actStatus];
   const actColor = { zero: '#EF4444', low: '#F59E0B', good: '#10B981', high: '#0EA5E9' }[actStatus];
 
@@ -285,7 +286,8 @@ export function InsightsTab() {
   const pet = pets[selectedPetIdx] || pets[0];
   const ageMonths = useMemo(() => calcAgeMonths(pet?.birthdate || '2024-01'), [pet]);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [result, setResult] = useState<DogEngineResult | null>(null);
   const [showReport, setShowReport] = useState(false);
  
@@ -310,8 +312,46 @@ export function InsightsTab() {
     }, 1600);
   };
  
-  const printReport = () => {
-    window.print();
+  const printReport = async () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile && navigator.share) {
+      setIsPrinting(true);
+      try {
+        const printContent = document.getElementById('vip-report-content');
+        if (!printContent) throw new Error("Content not found");
+        
+        // Use html2canvas to capture the report area
+        const canvas = await html2canvas(printContent, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        });
+        
+        canvas.toBlob(async (blob) => {
+          if (!blob) throw new Error("Blob creation failed");
+          const file = new File([blob], 'Petory_VIP_Report.png', { type: 'image/png' });
+          
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
+              files: [file]
+            });
+          } else {
+            // Fallback if sharing files is not supported
+            window.print();
+          }
+          setIsPrinting(false);
+        }, 'image/png');
+      } catch (err) {
+        console.error('Print/Share failed:', err);
+        window.print(); // Fallback
+        setIsPrinting(false);
+      }
+    } else {
+      // For PC, native print works flawlessly
+      window.print();
+    }
   };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
@@ -689,9 +729,15 @@ export function InsightsTab() {
                 </button>
                 <button 
                   onClick={printReport}
-                  className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20"
+                  disabled={isPrinting}
+                  className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2"
                 >
-                  PRINT REPORT
+                  {isPrinting ? (
+                    <RefreshCw size={16} className="animate-spin" />
+                  ) : (
+                    <Printer size={16} />
+                  )}
+                  {KO ? (isPrinting ? '처리중...' : '리포트 인쇄/공유') : (isPrinting ? 'PROCESSING...' : 'PRINT REPORT')}
                 </button>
               </div>
             </motion.div>
