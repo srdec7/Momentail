@@ -537,7 +537,10 @@ export function InsightsTab() {
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.35 + i * 0.1 }}
-                    border: `1px solid ${card.color}20`,
+                  className="rounded-2xl overflow-hidden flex shadow-sm"
+                  style={{
+                    background: '#FFFFFF',
+                    border: `1px solid ${card.color}25`,
                   }}
                 >
                   {/* Color accent bar */}
