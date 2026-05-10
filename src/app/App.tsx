@@ -238,21 +238,25 @@ export default function App() {
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
       />
-      <div
-        className="w-full h-[100dvh] overflow-hidden flex flex-col"
-        style={{
-          background: '#DCD7C9',
-        }}
-      >
-        {!user ? (
-          <LoginScreen onLogin={(usr) => { if(usr) setUser(usr) }} />
-        ) : (
-          <MainShell />
-        )}
-        {/* Modals available everywhere */}
-        <AnimatePresence>{showAudioModal && <AudioPlayerModal />}</AnimatePresence>
-        <AnimatePresence>{showPremiumModal && <PremiumModal />}</AnimatePresence>
-        <AnimatePresence>{showPetFormModal && <PetFormModal />}</AnimatePresence>
+      {/* ── Outer Wrapper (PC Background) ── */}
+      <div className="w-full min-h-screen bg-[#A29E91] flex justify-center">
+        {/* ── Main App Container (Mobile Frame on PC) ── */}
+        <div
+          className="w-full max-w-[480px] h-[100dvh] overflow-hidden flex flex-col relative shadow-2xl"
+          style={{
+            background: '#DCD7C9',
+          }}
+        >
+          {!user ? (
+            <LoginScreen onLogin={(usr) => { if(usr) setUser(usr) }} />
+          ) : (
+            <MainShell />
+          )}
+          {/* Modals available everywhere */}
+          <AnimatePresence>{showAudioModal && <AudioPlayerModal />}</AnimatePresence>
+          <AnimatePresence>{showPremiumModal && <PremiumModal />}</AnimatePresence>
+          <AnimatePresence>{showPetFormModal && <PetFormModal />}</AnimatePresence>
+        </div>
       </div>
     </AppContext.Provider>
   );
