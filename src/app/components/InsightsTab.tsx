@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer } from 'lucide-react';
 import { useApp, ActivityType } from '../App';
 import { SparklineChart } from './Charts';
-import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 // ─── Error Boundary ────────────────────────────────────────────────────────────
@@ -291,6 +291,7 @@ export function InsightsTab() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<DogEngineResult | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
  
   const todayEntries = timeline.filter(e => e.petId === pet.id && e.date === '2026-05-04');
 
@@ -313,109 +314,75 @@ export function InsightsTab() {
     }, 1600);
   };
  
-  const printReport = () => {
-    const reportElement = document.getElementById('vip-report-content');
-    if (!reportElement) return;
-
-    const reportHtml = reportElement.innerHTML;
-
-    // Grab all injected styles from Vite
-    const styleTags = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-      .map(el => el.outerHTML)
-      .join('\n');
-
-    // Open a new tab synchronously to bypass popup blockers and PWA sandbox
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert(KO ? "팝업이 차단되었습니다. 브라우저 설정에서 팝업 차단을 해제해주세요." : "Popup blocked. Please allow popups for this site.");
-      return;
+  useEffect(() => {
+    if (showReport && result) {
+      const generatePDF = async () => {
+        try {
+          const element = document.getElementById('vip-report-content');
+          if (!element) return;
+          
+          // html-to-image natively supports modern CSS variables like oklch()
+          const imgData = await htmlToImage.toJpeg(element, { 
+            quality: 0.95, 
+            backgroundColor: '#ffffff',
+            pixelRatio: 2,
+            style: {
+              height: 'auto',
+              overflow: 'visible'
+            }
+          });
+          
+          const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const imgProps = pdf.getImageProperties(imgData);
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+          
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          const blob = pdf.output('blob');
+          const file = new File([blob], 'Petory_VIP_Health_Report.pdf', { type: 'application/pdf' });
+          
+          setPdfFile(file);
+        } catch (e) {
+          console.error("Background PDF gen failed", e);
+        }
+      };
+      
+      // Give the modal time to finish its opening animation
+      setTimeout(generatePDF, 600);
+    } else {
+      setPdfFile(null);
     }
+  }, [showReport, result]);
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${KO ? 'Petory VIP 리포트' : 'Petory VIP Report'}</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-          ${styleTags}
-          <style>
-            body, html { 
-              background: #f1f5f9 !important; 
-              color: black !important; 
-              margin: 0; 
-              padding: 0; 
-              height: auto !important;
-              overflow: visible !important;
-              -webkit-text-size-adjust: 100%;
-            }
-            .print-wrapper {
-              padding: 20px;
-              max-width: 600px;
-              margin: 80px auto 40px auto;
-              height: auto !important;
-              overflow: visible !important;
-              position: static !important;
-              background: white;
-              border-radius: 24px;
-              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            }
-            /* Override scroll containers to show all content */
-            .petory-scroll { overflow: visible !important; height: auto !important; }
-            /* Hide the original print button container */
-            .print-btn-container { display: none !important; }
-            svg { max-width: 100%; height: auto; }
-            
-            /* Giant floating button for iOS Safari */
-            .ios-print-action {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100%;
-              background: #3E6D52;
-              color: white;
-              text-align: center;
-              padding: 20px;
-              font-size: 16px;
-              font-weight: 800;
-              z-index: 99999;
-              cursor: pointer;
-              border: none;
-              box-shadow: 0 4px 15px rgba(62,109,82,0.4);
-              transition: background 0.2s;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 8px;
-            }
-            .ios-print-action:active { background: #2f543e; }
+  const downloadFallback = (file: File) => {
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  };
 
-            @media print {
-              .ios-print-action { display: none !important; }
-              body, html { background: white !important; }
-              .print-wrapper { margin: 0; box-shadow: none; border-radius: 0; padding: 0; }
-            }
-          </style>
-        </head>
-        <body>
-          <button class="ios-print-action" onclick="window.print()">
-            🖨️ ${KO ? '여기를 눌러 [인쇄 / PDF 저장] 하기' : 'Tap here to Print / Save PDF'}
-          </button>
-          <div class="print-wrapper flex flex-col min-h-0">
-            ${reportHtml}
-          </div>
-          <script>
-            // Attempt automatic print (works on PC Chrome / Android)
-            // iOS Safari will silently block this, so the user will use the big button instead.
-            window.onload = function() {
-              setTimeout(function() {
-                window.print();
-              }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+  const printReport = async () => {
+    if (!pdfFile) return;
+
+    // 100% synchronous call to bypass Safari's user-gesture block
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      try {
+        await navigator.share({
+          title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
+          files: [pdfFile]
+        });
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+           downloadFallback(pdfFile);
+        }
+      }
+    } else {
+      downloadFallback(pdfFile);
+    }
   };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
@@ -795,10 +762,11 @@ export function InsightsTab() {
                 </button>
                 <button 
                   onClick={printReport}
-                  className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+                  disabled={!pdfFile}
+                  className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 active:scale-95"
                 >
-                  <Printer size={16} />
-                  {KO ? '리포트 인쇄' : 'PRINT REPORT'}
+                  {!pdfFile ? <RefreshCw size={16} className="animate-spin" /> : <Printer size={16} />}
+                  {KO ? (!pdfFile ? '준비중...' : '인쇄/PDF저장') : (!pdfFile ? 'PREPARING...' : 'PRINT / SAVE PDF')}
                 </button>
               </div>
             </motion.div>
