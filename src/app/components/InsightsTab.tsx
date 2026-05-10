@@ -291,7 +291,6 @@ export function InsightsTab() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<DogEngineResult | null>(null);
   const [showReport, setShowReport] = useState(false);
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
  
   const todayEntries = timeline.filter(e => e.petId === pet.id && e.date === '2026-05-04');
 
@@ -314,78 +313,71 @@ export function InsightsTab() {
     }, 1600);
   };
  
-  useEffect(() => {
-    if (showReport && result) {
-      const generatePDF = async () => {
-        try {
-          const element = document.getElementById('vip-report-content');
-          if (!element) return;
-          
-          const canvas = await html2canvas(element, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#ffffff',
-            windowWidth: element.scrollWidth,
-            windowHeight: element.scrollHeight,
-            onclone: (clonedDoc) => {
-              const clonedElement = clonedDoc.getElementById('vip-report-content');
-              if (clonedElement) {
-                clonedElement.style.height = 'auto';
-                clonedElement.style.overflow = 'visible';
-              }
+  const printReport = () => {
+    const reportElement = document.getElementById('vip-report-content');
+    if (!reportElement) return;
+
+    const reportHtml = reportElement.innerHTML;
+
+    // Grab all injected styles from Vite
+    const styleTags = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(el => el.outerHTML)
+      .join('\n');
+
+    // Open a new tab synchronously to bypass popup blockers and PWA sandbox
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert(KO ? "팝업이 차단되었습니다. 브라우저 설정에서 팝업 차단을 해제해주세요." : "Popup blocked. Please allow popups for this site.");
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${KO ? 'Petory VIP 리포트' : 'Petory VIP Report'}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          ${styleTags}
+          <style>
+            body, html { 
+              background: white !important; 
+              color: black !important; 
+              margin: 0; 
+              padding: 0; 
+              height: auto !important;
+              overflow: visible !important;
             }
-          });
-          
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
-          const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-          const blob = pdf.output('blob');
-          const file = new File([blob], 'Petory_VIP_Health_Report.pdf', { type: 'application/pdf' });
-          setPdfFile(file);
-        } catch (e) {
-          console.error("Background PDF gen failed", e);
-        }
-      };
-      
-      // Delay slightly to ensure DOM is fully rendered
-      setTimeout(generatePDF, 600);
-    } else {
-      setPdfFile(null);
-    }
-  }, [showReport, result]);
-
-  const downloadFallback = (file: File) => {
-    const url = URL.createObjectURL(file);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(url), 100);
-  };
-
-  const printReport = async () => {
-    if (!pdfFile) return;
-
-    // 100% synchronous call to bypass Safari's user-gesture block
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-      try {
-        await navigator.share({
-          title: KO ? 'VIP 건강 리포트' : 'VIP Health Report',
-          files: [pdfFile]
-        });
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-           downloadFallback(pdfFile);
-        }
-      }
-    } else {
-      downloadFallback(pdfFile);
-    }
+            .print-wrapper {
+              padding: 20px;
+              max-width: 600px;
+              margin: 0 auto;
+              height: auto !important;
+              overflow: visible !important;
+              position: static !important;
+              background: white;
+            }
+            /* Override scroll containers to show all content */
+            .petory-scroll { overflow: visible !important; height: auto !important; }
+            /* Hide the print button in the printed version */
+            .print-btn-container { display: none !important; }
+            svg { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>
+          <div class="print-wrapper bg-white flex flex-col min-h-0">
+            ${reportHtml}
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 300);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   useEffect(() => { runAnalysis(); }, [pet.id, lang]);
@@ -756,7 +748,7 @@ export function InsightsTab() {
               </div>
  
               {/* Footer Actions */}
-              <div className="p-4 bg-gray-50 flex gap-2 shrink-0">
+              <div className="p-4 bg-gray-50 flex gap-2 shrink-0 print-btn-container">
                 <button 
                   onClick={() => setShowReport(false)}
                   className="flex-1 py-3 text-sm font-bold text-gray-400"
@@ -765,11 +757,10 @@ export function InsightsTab() {
                 </button>
                 <button 
                   onClick={printReport}
-                  disabled={!pdfFile}
-                  className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                  className="flex-1 py-3 bg-[#A27B5C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#A27B5C]/20 flex items-center justify-center gap-2 transition-all active:scale-95"
                 >
-                  {!pdfFile ? <RefreshCw size={16} className="animate-spin" /> : <Printer size={16} />}
-                  {KO ? (!pdfFile ? '준비중...' : '인쇄/PDF저장') : (!pdfFile ? 'PREPARING...' : 'PRINT / SAVE PDF')}
+                  <Printer size={16} />
+                  {KO ? '리포트 인쇄' : 'PRINT REPORT'}
                 </button>
               </div>
             </motion.div>
