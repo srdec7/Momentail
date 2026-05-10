@@ -490,25 +490,26 @@ export function InsightsTab() {
                 const cfg = METRIC_LABELS[key];
                 return (
                   <motion.div
-                    key={key}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + i * 0.08 }}
-                    className="rounded-2xl p-4 flex flex-col items-center text-center shadow-sm"
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 + i * 0.1 }}
+                    className="rounded-2xl p-4 flex flex-col items-center text-center shadow-md border border-[rgba(0,0,0,0.03)]"
                     style={{
-                      background: 'rgba(255,255,255,0.7)',
-                      border: `1px solid ${m.color}30`,
+                      background: '#FFFFFF',
                     }}
                   >
-                    <div style={{ color: m.color, marginBottom: 8 }}>{cfg.icon}</div>
-                    <p className="text-[13px] font-bold mt-1 mb-1.5" style={{ color: '#2C3639' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: `${m.color}15`, color: m.color }}>
+                      {cfg.icon}
+                    </div>
+                    <p className="text-[13px] font-black mt-1 mb-1" style={{ color: '#1A2421' }}>
                       {KO ? cfg.KO : cfg.EN}
                     </p>
-                    <div className="text-[12px] font-bold" style={{ color: m.color }}>
+                    <div className="text-[13px] font-black" style={{ color: m.color }}>
                       {m.label}
                     </div>
                     {/* mini bar */}
-                    <div className="w-full mt-2.5 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
+                    <div className="w-full mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: '#F0F2F1' }}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${m.value}%` }}
@@ -526,7 +527,7 @@ export function InsightsTab() {
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-2 ml-1">
                 <Lightbulb size={18} style={{ color: '#A27B5C' }} />
-                <p className="text-[15px] font-bold" style={{ color: '#2C3639' }}>
+                <p className="text-[15px] font-bold" style={{ color: '#1A2421' }}>
                   {KO ? '맞춤 코칭' : 'Personalized Coaching'}
                 </p>
               </div>
@@ -536,9 +537,6 @@ export function InsightsTab() {
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.35 + i * 0.1 }}
-                  className="rounded-2xl overflow-hidden flex"
-                  style={{
-                    background: `${card.color}10`,
                     border: `1px solid ${card.color}20`,
                   }}
                 >

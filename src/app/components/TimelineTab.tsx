@@ -6,13 +6,13 @@ import { addTimelineEntry, updateTimelineEntry, deleteTimelineEntry } from '../.
 
 // ─── Activity Config ───────────────────────────────────────────────────────────
 const ACTIVITY_CONFIG: Record<ActivityType, { icon: React.ReactNode; labelKO: string; labelEN: string; color: string; bg: string }> = {
-  meal:    { icon: <Utensils size={20} />,      labelKO: '식사',   labelEN: 'Meal',    color: '#F27A3D', bg: 'rgba(242,122,61,0.12)'  },
-  walk:    { icon: <Footprints size={20} />,    labelKO: '산책',   labelEN: 'Walk',    color: '#3E8E41', bg: 'rgba(62,142,65,0.12)'  },
-  sleep:   { icon: <Moon size={20} />,          labelKO: '수면',   labelEN: 'Sleep',   color: '#7450A6', bg: 'rgba(116,80,166,0.12)' },
-  toilet:  { icon: <Droplets size={20} />,      labelKO: '배변',   labelEN: 'Toilet',  color: '#3A9AB7', bg: 'rgba(58,154,183,0.12)' },
-  vet:     { icon: <Stethoscope size={20} />,   labelKO: '병원',   labelEN: 'Vet',     color: '#E64A4A', bg: 'rgba(230,74,74,0.12)' },
-  bath:    { icon: <Bath size={20} />,          labelKO: '목욕',   labelEN: 'Bath',    color: '#47A1B0', bg: 'rgba(71,161,176,0.12)' },
-  other:   { icon: <Tag size={20} />,           labelKO: '기타',   labelEN: 'Other',   color: '#8B6D55', bg: 'rgba(139,109,85,0.12)'  },
+  meal:    { icon: <Utensils size={20} />,      labelKO: '식사',   labelEN: 'Meal',    color: '#FF9F43', bg: '#FFF3E0'  },
+  walk:    { icon: <Footprints size={20} />,    labelKO: '산책',   labelEN: 'Walk',    color: '#1DD1A1', bg: '#E8F5E9'  },
+  sleep:   { icon: <Moon size={20} />,          labelKO: '수면',   labelEN: 'Sleep',   color: '#5F27CD', bg: '#F3E5F5' },
+  toilet:  { icon: <Droplets size={20} />,      labelKO: '배변',   labelEN: 'Toilet',  color: '#00D2D3', bg: '#E0F7FA' },
+  vet:     { icon: <Stethoscope size={20} />,   labelKO: '병원',   labelEN: 'Vet',     color: '#FF4D4D', bg: '#FFEBEE' },
+  bath:    { icon: <Bath size={20} />,          labelKO: '목욕',   labelEN: 'Bath',    color: '#48DBFB', bg: '#E1F5FE' },
+  other:   { icon: <Tag size={20} />,           labelKO: '기타',   labelEN: 'Other',   color: '#576574', bg: '#F5F6F7'  },
 };
 
 // ─── Add Activity Modal (inline bottom sheet) ─────────────────────────────────
@@ -202,10 +202,10 @@ function TimelineItem({ entry, index }: EntryProps) {
 
         {/* Content card (Vivid Edge Style) */}
         <div
-          className="flex-1 rounded-2xl p-4 shadow-sm relative overflow-hidden flex items-center"
+          className="flex-1 rounded-2xl p-4 shadow-md relative overflow-hidden flex items-center"
           style={{
-            background: '#fff',
-            border: '1px solid rgba(44,54,57,0.06)',
+            background: '#FFFFFF',
+            border: '1px solid rgba(0,0,0,0.04)',
             minHeight: '76px'
           }}
         >
@@ -220,11 +220,11 @@ function TimelineItem({ entry, index }: EntryProps) {
               <div className="flex items-center justify-between mb-1">
                 <span
                   className="text-[15px] font-black tracking-tight"
-                  style={{ color: '#2C3639' }}
+                  style={{ color: '#1A2421' }}
                 >
                   {KO ? cfg.labelKO : cfg.labelEN}
                 </span>
-                <span className="text-[12px] font-bold" style={{ color: '#A27B5C' }}>
+                <span className="text-[12px] font-extrabold" style={{ color: '#3E6D52' }}>
                   {entry.time}
                 </span>
               </div>
@@ -236,16 +236,16 @@ function TimelineItem({ entry, index }: EntryProps) {
                     value={editNote}
                     onChange={e => setEditNote(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setIsEditing(false); }}
-                    className="flex-1 text-sm px-3 py-1.5 rounded-xl outline-none"
-                    style={{ background: 'rgba(44,54,57,0.06)', color: '#2C3639', border: `1.5px solid ${cfg.color}` }}
+                    className="flex-1 text-sm px-3 py-1.5 rounded-xl outline-none font-medium"
+                    style={{ background: '#F5F7F6', color: '#1A2421', border: `1.5px solid ${cfg.color}` }}
                   />
-                  <button onClick={saveEdit} className="p-1.5"><Check size={18} style={{ color: '#5BAD6F' }} /></button>
+                  <button onClick={saveEdit} className="p-1.5"><Check size={18} style={{ color: '#45B649' }} /></button>
                 </div>
               ) : (
                 entry.note ? (
-                  <p className="text-sm mt-0.5 leading-relaxed" style={{ color: '#5a5a52' }}>{entry.note}</p>
+                  <p className="text-sm mt-0.5 leading-relaxed font-medium" style={{ color: '#5C6B64' }}>{entry.note}</p>
                 ) : (
-                  <p className="text-[11px] mt-0.5 opacity-40 italic" style={{ color: '#8a897e' }}>
+                  <p className="text-[11px] mt-0.5 opacity-50 italic font-medium" style={{ color: '#8a8e8b' }}>
                     {KO ? '메모 없음' : 'No notes'}
                   </p>
                 )
@@ -327,12 +327,12 @@ export function TimelineTab() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2
-              className="text-base font-bold"
-              style={{ color: '#2C3639' }}
+              className="text-base font-black tracking-tight"
+              style={{ color: '#1A2421' }}
             >
               {KO ? '활동 타임라인' : 'Activity Timeline'}
             </h2>
-            <p className="text-[12px] font-medium" style={{ color: '#8a897e' }}>
+            <p className="text-[12px] font-bold" style={{ color: '#5C6B64' }}>
               {KO ? '2026.05.04' : 'May 4, 2026'} · {KO ? `${activityCount}개의 기록` : `${activityCount} activities`}
             </p>
           </div>
