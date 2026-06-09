@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { LoginScreen } from './components/LoginScreen';
 import { MainShell } from './components/MainShell';
-import { supabase } from '../lib/supabase';
 import { getProfiles, getTimeline } from '../lib/api';
 import { TRACKS, AudioPlayerModal } from './components/AudioPlayerModal';
 import { PremiumModal } from './components/PremiumModal';
@@ -76,13 +75,10 @@ export const useApp = () => useContext(AppContext);
 // ─── App Component ────────────────────────────────────────────────────────────
 export default function App() {
   const [user, setUser] = useState<any>(null);
-  const [authChecked, setAuthChecked] = useState(false);
   const [lang, setLang] = useState<Lang>('EN');
-  const [isPremium, setIsPremium] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('profile');
-  const [pets, setPets] = useState<Pet[]>([{
-    id: 'default', name: 'My Pet', breed: '', birthdate: '2024-01', photo: 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400', weight: 5, weightUnit: 'kg', lastVaccine: '', nextVet: ''
-  }]);
+  const [pets, setPets] = useState<Pet[]>([]);
   const [selectedPetIdx, setSelectedPetIdx] = useState(0);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -131,79 +127,58 @@ export default function App() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('premium') === 'success') {
       setIsPremium(true);
+      localStorage.setItem('petory_premium', 'true');
       window.history.replaceState({}, document.title, window.location.pathname);
       alert(lang === 'KO' ? '프리미엄 결제가 완료되었습니다! 🎉' : 'Family Pack Unlocked! 🎉');
     }
   }, [lang]);
 
-  // Auth State
+  // ─── Local-First Initialization ─────────────────────────────────────────────
+  // On mount, check localStorage for existing profiles.
+  // If profiles exist, auto-enter the app. Otherwise show the registration screen.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      // Only set user from session if no manual login has happened yet
-      setUser((prev: any) => prev ?? (session?.user || null));
-      setAuthChecked(true);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Only override user state if it was set by Supabase (not by manual master-key or onLogin)
-      setUser((prev: any) => {
-        // If prev is a manually-set user (e.g. master key with id:null), keep it
-        if (prev && prev.id === null) return prev;
-        return session?.user || null;
-      });
-    });
-    return () => subscription.unsubscribe();
+    const premiumStatus = localStorage.getItem('petory_premium') === 'true';
+    setIsPremium(premiumStatus);
+    
+    getProfiles().then((profiles) => {
+      if (profiles && profiles.length > 0) {
+        setUser({ isLocal: true });
+      }
+    }).catch(console.error);
   }, []);
 
-
-  // Premium Status
-  useEffect(() => {
-    setIsPremium(true);
-  }, [user]);
-
-  // Load Profiles & Timeline
+  // ─── Load Profiles & Timeline from localStorage ────────────────────────────
   useEffect(() => {
     if (user) {
-      getProfiles().then(async (data) => {
-        if (data && data.length > 0) {
-          const loadedPets = [];
-          for (const p of data) {
-            const detail = await fetch(`/api/profile?profileId=${p.id}`).then(r => r.json());
-            loadedPets.push({
-              id: detail.id,
-              name: detail.name || p.name || 'My Pet',
-              breed: detail.breed || '',
-              birthdate: detail.birthDate || '2024-01',
-              photo: detail.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-              weight: parseFloat(detail.weight) || 0,
-              weightUnit: detail.weightUnit || 'kg',
-              lastVaccine: detail.vaccines || '',
-              nextVet: detail.nextVet || ''
-            });
-          }
+      getProfiles().then(async (profiles) => {
+        if (profiles && profiles.length > 0) {
+          const loadedPets: Pet[] = profiles.map((p: any) => ({
+            id: p.id,
+            name: p.name || 'My Pet',
+            breed: p.breed || '',
+            birthdate: p.birthdate || '2024-01',
+            photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+            weight: parseFloat(p.weight) || 0,
+            weightUnit: p.weightUnit || 'kg',
+            lastVaccine: p.lastVaccine || '',
+            nextVet: p.nextVet || ''
+          }));
           setPets(loadedPets);
           
-          if (loadedPets.length > 0) {
-             const tl = await getTimeline(loadedPets[selectedPetIdx]?.id || 'default');
-             // map backend timeline to frontend timeline structure
-             const mappedTl = tl.map((t: any) => {
-                const date = t.time.split('T')[0] || t.created_at.split('T')[0]; // simple parsing
-                const time = t.time.includes('T') ? t.time.split('T')[1].substring(0,5) : t.time;
-                return {
-                  id: t.id,
-                  petId: t.profile_id,
-                  type: t.type,
-                  time: time,
-                  date: date,
-                  note: t.description
-                }
-             });
-             setTimeline(mappedTl);
+          const currentPet = loadedPets[selectedPetIdx];
+          if (currentPet) {
+            const tl = await getTimeline(currentPet.id);
+            setTimeline(tl.map((t: any) => ({
+              id: t.id,
+              petId: t.profileId,
+              type: t.type,
+              time: t.time,
+              date: t.date,
+              note: t.note || '',
+              value: t.value,
+              unit: t.unit,
+            })));
           }
-        } else {
-          // fallback if no profiles
-          setPets([{
-            id: 'default', name: 'My Pet', breed: '', birthdate: '2024-01', photo: 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400', weight: 5, weightUnit: 'kg', lastVaccine: '', nextVet: ''
-          }]);
         }
       }).catch(console.error);
     }
@@ -224,10 +199,6 @@ export default function App() {
     editingPet, setEditingPet,
     audioCurrentTime, audioDuration, seekAudio,
   };
-
-  if (!authChecked) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#DCD7C9] text-base font-medium">Loading...</div>;
-  }
 
   return (
     <AppContext.Provider value={ctx}>

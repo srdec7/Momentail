@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Camera, Check, ChevronDown, Loader2, HelpCircle } from 'lucide-react';
 import { useApp, Pet } from '../App';
-import { supabase } from '../../lib/supabase';
 import { saveProfile } from '../../lib/api';
 
 // ─── Default photo ─────────────────────────────────────────────────────────────
@@ -61,26 +60,28 @@ export function PetFormModal() {
     reader.readAsDataURL(file);
   };
 
-  // ── Upload to Supabase Storage ─────────────────────────────────────────────
+  // ── Resize & convert photo to base64 for local storage ────────────────────
   const uploadPhoto = async (file: File): Promise<string> => {
-    const ext  = file.name.split('.').pop() ?? 'jpg';
-    const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    const BUCKET = 'pet-photos';
-
-    // Ensure bucket exists (creates if first-time use)
-    const { data: buckets } = await supabase.storage.listBuckets();
-    if (!buckets?.find(b => b.name === BUCKET)) {
-      await supabase.storage.createBucket(BUCKET, { public: true });
-    }
-
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(path, file, { cacheControl: '3600', upsert: false });
-
-    if (uploadError) throw uploadError;
-
-    const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-    return data.publicUrl;
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 400;
+          const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width * ratio;
+          canvas.height = img.height * ratio;
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.75));
+        };
+        img.onerror = reject;
+        img.src = ev.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   // ── Save ──────────────────────────────────────────────────────────────────

@@ -1,81 +1,44 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Crown, Eye, EyeOff, ChevronRight, Sparkles, ClipboardList, Headphones, RefreshCw } from 'lucide-react';
+import { Crown, ChevronRight, Sparkles, ClipboardList, Headphones, RefreshCw } from 'lucide-react';
 import { useApp } from '../App';
-import { supabase } from '../../lib/supabase';
+import { saveProfile } from '../../lib/api';
 import { PlaylistButton } from './MainShell';
 
 interface Props { onLogin: (user?: any) => void; }
 
 export function LoginScreen({ onLogin }: Props) {
-  const { lang, setLang, setShowPremiumModal, isPremium } = useApp();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPw, setShowPw] = useState(false);
+  const { lang, setLang } = useApp();
+  const [dogName, setDogName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   const KO = lang === 'KO';
 
-  const handleLogin = async (e?: React.FormEvent) => {
+  const handleRegister = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError('');
     
-    let targetEmail = email.trim();
-    let targetPassword = password;
+    let targetName = dogName.trim();
 
-    // Master Key: instant bypass, no Supabase call needed
-    const isMasterEmail = targetEmail.toLowerCase() === 'master0827' || targetEmail.toLowerCase() === '[master0827]';
-    const isMasterPassword = password.toLowerCase() === 'master0827' || password.toLowerCase() === '[master0827]';
-    if (isMasterEmail || isMasterPassword) {
-      onLogin({ id: null, email: 'master@petory.app' });
-      return;
-    }
-
-    if (!targetEmail || !targetPassword) {
-      setError(KO ? '이메일과 비밀번호를 입력해주세요.' : 'Please enter email and password.');
+    if (!targetName) {
+      setError(KO ? '반려견의 이름을 입력해주세요.' : 'Please enter your dog\'s name.');
       return;
     }
 
     setIsLoading(true);
     try {
-      // 1. Try signing in first
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: targetEmail, password: targetPassword });
-      if (!signInError && data?.user) {
-        onLogin(data.user);
-        return;
-      }
-
-      // 2. If user doesn't exist, auto sign up
-      if (signInError && signInError.message.toLowerCase().includes('invalid login')) {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email: targetEmail, password: targetPassword });
-        if (signUpError) {
-          if (signUpError.message.includes('already registered')) {
-            throw new Error(lang === 'EN' ? 'Incorrect password for existing account.' : '기존 계정의 비밀번호가 일치하지 않습니다.');
-          }
-          throw signUpError;
-        }
-        
-        // signUp returns user even when email confirmation is pending
-        // Mark as manually-confirmed so App.tsx auth state won't override it
-        if (signUpData?.user) {
-          onLogin({ ...signUpData.user, _manual_login: true });
-          return;
-        }
-        // Fallback: create a guest user object with the email
-        onLogin({ id: `guest_${Date.now()}`, email: targetEmail, _manual_login: true });
-        return;
-      } else if (signInError) {
-        throw signInError;
-      }
+      // Save the initial profile locally
+      await saveProfile({ name: targetName });
+      // Proceed to main shell
+      onLogin({ isLocal: true });
     } catch (err: any) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="relative w-full h-full overflow-y-auto flex flex-col font-sans">
@@ -122,6 +85,7 @@ export function LoginScreen({ onLogin }: Props) {
         {/* Playlist Button */}
         <PlaylistButton />
       </div>
+      
       {/* ── Hero Section (Floating Logo Only) ── */}
       <div className="relative z-10 flex flex-col items-center mt-0 sm:mt-8 mb-0 sm:mb-2 px-6 text-center">
         <motion.div
@@ -139,7 +103,7 @@ export function LoginScreen({ onLogin }: Props) {
         </motion.div>
       </div>
 
-      {/* ── Forest Glass Login Card ── */}
+      {/* ── Forest Glass Registration Card ── */}
       <div className="flex-1 flex flex-col justify-start px-5 relative z-10 pt-[85px] sm:pt-[140px]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -159,65 +123,35 @@ export function LoginScreen({ onLogin }: Props) {
               border: '1px solid rgba(255, 255, 255, 0.6)',
               boxShadow: '0 20px 40px -10px rgba(26, 36, 38, 0.1)',
             }}
-            onSubmit={handleLogin}
+            onSubmit={handleRegister}
           >
             <h2 className="mb-4 text-[#1A2426] text-[1.25rem] font-black text-center tracking-tight">
-              {KO ? '케어 시작하기' : 'Start Caring'}
+              {KO ? '나의 반려견 등록하기' : 'Register My Dog'}
             </h2>
 
-            {/* Email Field */}
-            <div className="mb-2.5">
+            {/* Dog Name Field */}
+            <div className="mb-4">
               <label className="block text-[12px] mb-1 font-bold uppercase tracking-wider pl-1" style={{ color: '#1F2937' }}>
-                {KO ? '이메일 계정' : 'Email Account'}
+                {KO ? '반려견 이름' : 'Dog Name'}
               </label>
               <input
                 type="text"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onFocus={() => setFocusedField('email')}
+                value={dogName}
+                onChange={e => setDogName(e.target.value)}
+                onFocus={() => setFocusedField('name')}
                 onBlur={() => setFocusedField(null)}
-                placeholder="petory@example.com"
+                placeholder={KO ? '예: 초코, 보리' : 'e.g. Max, Bella'}
                 className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all duration-300"
                 style={{
                   background: 'rgba(255,255,255,0.85)',
-                  border: `2px solid ${focusedField === 'email' ? '#1A2426' : 'transparent'}`,
+                  border: `2px solid ${focusedField === 'name' ? '#1A2426' : 'transparent'}`,
                   color: '#111827',
                 }}
               />
+              {error && <p className="text-red-500 text-xs mt-1 pl-1 font-medium">{error}</p>}
             </div>
 
-            {/* Password Field */}
-            <div className="mb-4">
-              <label className="block text-[12px] mb-1 font-bold uppercase tracking-wider pl-1" style={{ color: '#1F2937' }}>
-                {KO ? '비밀번호' : 'Password'}
-              </label>
-              <div className="relative">
-                <input
-                  type={showPw ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  onFocus={() => setFocusedField('pw')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-11 rounded-2xl text-sm outline-none transition-all duration-300"
-                  style={{
-                    background: 'rgba(255,255,255,0.85)',
-                    border: `2px solid ${focusedField === 'pw' ? '#1A2426' : 'transparent'}`,
-                    color: '#111827',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(!showPw)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2"
-                  style={{ color: '#1A2426' }}
-                >
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Login Button (Midnight Green) */}
+            {/* Start Button (Midnight Green) */}
             <motion.button
               whileTap={{ scale: 0.97 }}
               type="submit"
@@ -235,7 +169,7 @@ export function LoginScreen({ onLogin }: Props) {
                 <RefreshCw size={18} className="animate-spin" />
               ) : (
                 <>
-                  <span>{KO ? '모멘테일 로그인' : 'Login to Momentail'}</span>
+                  <span>{KO ? '케어 시작하기' : 'Start Caring'}</span>
                   <ChevronRight size={16} strokeWidth={3} />
                 </>
               )}
@@ -243,8 +177,8 @@ export function LoginScreen({ onLogin }: Props) {
 
             <p className="text-center text-[10px] mt-2.5 font-medium" style={{ color: '#6B7280' }}>
               {KO
-                ? '새로운 계정은 자동으로 가입됩니다.'
-                : 'New accounts are registered instantly.'}
+                ? '모든 기록은 이 기기에만 안전하게 저장됩니다.'
+                : 'All records are stored locally on your device.'}
             </p>
           </form>
         </motion.div>

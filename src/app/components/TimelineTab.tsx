@@ -202,7 +202,7 @@ function TimelineItem({ entry, index }: EntryProps) {
   const saveEdit = async () => {
     setTimeline(prev => prev.map(e => e.id === entry.id ? { ...e, note: editNote } : e));
     setIsEditing(false);
-    try { await updateTimelineEntry(entry.id, { description: editNote }); } catch(e) { console.error(e); }
+    try { await updateTimelineEntry(entry.id, { note: editNote }); } catch(e) { console.error(e); }
   };
 
   const deleteEntry = async () => {
