@@ -9,31 +9,35 @@ import { InsightsTab } from './InsightsTab';
 import { AudioPlayerModal } from './AudioPlayerModal';
 import { PremiumModal } from './PremiumModal';
 
-// ─── Music Bar ────────────────────────────────────────────────────────────────
-function MusicBar() {
+// ─── Playlist Button ────────────────────────────────────────────────────────────
+export function PlaylistButton() {
   const { isAudioPlaying, setShowAudioModal, lang } = useApp();
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.93 }}
       onClick={() => setShowAudioModal(true)}
-      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all shadow-sm border border-[rgba(0,0,0,0.08)]"
-      style={{ background: '#fff' }}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold"
+      style={{
+        background: 'linear-gradient(135deg, #1A2426 0%, #2A3638 100%)',
+        color: '#fff',
+        boxShadow: '0 4px 15px rgba(26,36,38,0.25)',
+        cursor: 'pointer',
+      }}
     >
-      <Music size={14} style={{ color: isAudioPlaying ? '#3E6D52' : '#1A2421' }} />
-      <span className="text-[12px] font-bold" style={{ color: '#1A2421' }}>
-        {lang === 'KO' ? '플레이리스트' : 'Playlist'}
-      </span>
+      <Music size={13} style={{ color: isAudioPlaying ? '#10B981' : '#fff' }} />
+      <span>{lang === 'KO' ? '플레이리스트' : 'Playlist'}</span>
       {isAudioPlaying && (
         <div className="flex items-end gap-[2px] h-[12px] ml-1">
           {[1, 2, 3].map(i => (
             <span
               key={i}
               className={`block rounded-full music-bar-${i}`}
-              style={{ width: 2, height: 12, background: '#3E6D52', transformOrigin: 'bottom' }}
+              style={{ width: 2, height: 12, background: '#10B981', transformOrigin: 'bottom' }}
             />
           ))}
         </div>
       )}
-    </button>
+    </motion.button>
   );
 }
 
@@ -226,30 +230,15 @@ export function MainShell() {
         {/* Pet selector */}
         <PetDropdown />
 
-        {/* Music bar center */}
-        <MusicBar />
+        {/* Logo center */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 mt-1">
+          <div className="w-[90px] h-[90px] flex items-center justify-center overflow-hidden">
+            <img src="/logo.png" alt="Momentail Logo" className="w-full h-full object-contain" />
+          </div>
+        </div>
 
-        {/* Right: Premium */}
-        <motion.button
-          whileTap={{ scale: 0.93 }}
-          onClick={() => setShowPremiumModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold"
-          style={
-            isPremium
-              ? {
-                  background: 'linear-gradient(135deg, #A27B5C, #c49870)',
-                  color: '#fff',
-                  boxShadow: '0 2px 10px rgba(162,123,92,0.4)',
-                }
-              : {
-                  background: 'rgba(44,54,57,0.08)',
-                  color: '#2C3639',
-                }
-          }
-        >
-          <Crown size={12} strokeWidth={2.5} />
-          {isPremium ? (KO ? '프리미엄' : 'Premium') : (KO ? '업그레이드' : 'Upgrade')}
-        </motion.button>
+        {/* Right: Playlist */}
+        <PlaylistButton />
       </div>
 
       {/* ── Tab Content ── */}

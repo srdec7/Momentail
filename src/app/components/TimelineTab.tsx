@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Edit2, Trash2, Check, X, Clock, Utensils, Footprints, Moon, Droplets, Stethoscope, Bath, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, X, Clock, Utensils, Footprints, Moon, Droplets, Stethoscope, Bath, Tag, Calendar } from 'lucide-react';
 import { useApp, ActivityType, TimelineEntry } from '../App';
 import { addTimelineEntry, updateTimelineEntry, deleteTimelineEntry } from '../../lib/api';
 
@@ -26,11 +26,23 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
     return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   });
   const [note, setNote] = useState('');
+  const [amount, setAmount] = useState<string>('');
 
   const handleSave = async () => {
     const today = new Date();
     // Use local date string in YYYY-MM-DD to avoid timezone shifts
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    let unit = undefined;
+    let numericValue = amount ? parseFloat(amount) : undefined;
+    if (numericValue !== undefined && !isNaN(numericValue)) {
+      if (type === 'meal') unit = 'g';
+      if (type === 'walk') unit = 'mins';
+      if (type === 'sleep') unit = 'hours';
+    } else {
+      numericValue = undefined;
+    }
+
     const entry: TimelineEntry = {
       id: `t_${Date.now()}`,
       petId,
@@ -38,6 +50,8 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
       time,
       date: todayStr,
       note,
+      value: numericValue,
+      unit
     };
     
     try {
@@ -45,7 +59,9 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
         profileId: petId,
         type,
         time: `${entry.date}T${time}:00`,
-        description: note
+        note,
+        value: numericValue,
+        unit
       });
       if (res && res.id) entry.id = res.id;
     } catch(e) { console.error(e); }
@@ -116,6 +132,26 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
             style={{ color: '#0F172A' }}
           />
         </div>
+
+        {/* Value input */}
+        {(type === 'meal' || type === 'walk' || type === 'sleep') && (
+          <div className="flex items-center gap-2 mb-3 p-3 rounded-xl" style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+            <Tag size={14} style={{ color: '#94A3B8' }} />
+            <span className="text-sm font-medium" style={{ color: '#64748B' }}>
+              {type === 'meal' ? (KO ? '식사량 (g)' : 'Amount (g)') :
+               type === 'walk' ? (KO ? '시간 (분)' : 'Duration (mins)') :
+               (KO ? '수면시간 (시간)' : 'Duration (hours)')}
+            </span>
+            <input
+              type="number"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              placeholder="0"
+              className="ml-auto text-base font-semibold outline-none bg-transparent text-right w-24"
+              style={{ color: '#0F172A' }}
+            />
+          </div>
+        )}
 
         {/* Note input */}
         <textarea
@@ -222,10 +258,15 @@ function TimelineItem({ entry, index }: EntryProps) {
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <span
-                  className="text-[15px] font-semibold"
+                  className="text-[15px] font-semibold flex items-center gap-2"
                   style={{ color: '#0F172A' }}
                 >
                   {KO ? cfg.labelKO : cfg.labelEN}
+                  {entry.value !== undefined && (
+                    <span className="text-[13px] font-bold px-2 py-0.5 rounded-md" style={{ background: `${cfg.color}15`, color: cfg.color }}>
+                      {entry.value} {entry.unit}
+                    </span>
+                  )}
                 </span>
                 <span className="text-[12px] font-medium" style={{ color: '#94A3B8' }}>
                   {entry.time}
@@ -310,19 +351,64 @@ export function TimelineTab() {
   const { lang, timeline, pets, selectedPetIdx } = useApp();
   const KO = lang === 'KO';
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<'today' | 'yesterday' | 'week'>('today');
+  const [selectedDate, setSelectedDate] = useState<'today' | 'yesterday' | 'week' | 'custom'>('today');
+  const [customDate, setCustomDate] = useState<string>('');
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const pet = pets[selectedPetIdx] || pets[0];
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   
-  const dateEntries = timeline.filter(e => e.petId === pet?.id && e.date === todayStr);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 7);
+  const sevenDaysAgoStr = `${sevenDaysAgo.getFullYear()}-${String(sevenDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(sevenDaysAgo.getDate()).padStart(2, '0')}`;
+
+  const dateEntries = timeline.filter(e => {
+    if (e.petId !== pet?.id) return false;
+    if (selectedDate === 'today') {
+      return e.date === todayStr;
+    } else if (selectedDate === 'yesterday') {
+      return e.date === yesterdayStr;
+    } else if (selectedDate === 'week') {
+      return e.date >= sevenDaysAgoStr && e.date <= todayStr;
+    } else if (selectedDate === 'custom') {
+      return e.date === customDate;
+    }
+    return false;
+  });
+  
   const activityCount = dateEntries.length;
 
   const DATE_LABELS = {
     today:     { KO: '오늘', EN: 'Today' },
     yesterday: { KO: '어제', EN: 'Yesterday' },
     week:      { KO: '이번 주', EN: 'This Week' },
+  };
+
+  const getHeaderDateText = () => {
+    if (selectedDate === 'today') {
+      return new Intl.DateTimeFormat(KO ? 'ko-KR' : 'en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+      }).format(today);
+    } else if (selectedDate === 'yesterday') {
+      return new Intl.DateTimeFormat(KO ? 'ko-KR' : 'en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+      }).format(yesterday);
+    } else if (selectedDate === 'custom' && customDate) {
+      const [y, m, d] = customDate.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      return new Intl.DateTimeFormat(KO ? 'ko-KR' : 'en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+      }).format(dateObj);
+    } else {
+      const start = new Intl.DateTimeFormat(KO ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric' }).format(sevenDaysAgo);
+      const end = new Intl.DateTimeFormat(KO ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric' }).format(today);
+      return KO ? `${start} ~ ${end} (최근 7일)` : `${start} ~ ${end} (Last 7 Days)`;
+    }
   };
 
   return (
@@ -338,8 +424,13 @@ export function TimelineTab() {
             >
               {KO ? '활동 타임라인' : 'Activity Timeline'}
             </h2>
-            <p className="text-[12px]" style={{ color: '#94A3B8' }}>
-              {KO ? todayStr.replace(/-/g, '.') : new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(today)} · {KO ? `${activityCount}개의 기록` : `${activityCount} activities`}
+            <p className="text-[12px]" style={{ color: '#64748B' }}>
+              {selectedDate === 'today' && (KO ? todayStr.replace(/-/g, '.') : new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(today))}
+              {selectedDate === 'yesterday' && (KO ? yesterdayStr.replace(/-/g, '.') : new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(yesterday))}
+              {selectedDate === 'week' && (KO ? '최근 7일 기록' : 'Last 7 Days')}
+              {selectedDate === 'custom' && customDate.replace(/-/g, '.')}
+              {` · `}
+              {KO ? `${activityCount}개의 기록` : `${activityCount} activities`}
             </p>
           </div>
 
@@ -356,7 +447,7 @@ export function TimelineTab() {
         </div>
 
         {/* ── Date Filter Pills ── */}
-        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+        <div className="flex gap-2 mb-4 items-center w-full">
           {(['today', 'yesterday', 'week'] as const).map(d => (
             <button
               key={d}
@@ -371,6 +462,36 @@ export function TimelineTab() {
               {KO ? DATE_LABELS[d].KO : DATE_LABELS[d].EN}
             </button>
           ))}
+
+          {/* Custom Date Picker - Minimal Icon Style */}
+          <div className="relative ml-auto flex items-center">
+            {/* Visual Button: Just a clean icon (and date text if selected) without box */}
+            <div
+              className="flex items-center gap-1.5 pointer-events-none"
+              style={{ color: selectedDate === 'custom' ? '#3E6D52' : '#4A5E58' }}
+            >
+              <Calendar size={20} strokeWidth={1.5} />
+              {selectedDate === 'custom' && customDate && (
+                <span className="text-sm font-medium">
+                  {customDate.substring(5).replace('-', '/')}
+                </span>
+              )}
+            </div>
+
+            {/* Native Date Input overlaid invisibly */}
+            <input
+              type="date"
+              value={customDate}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setCustomDate(e.target.value);
+                  setSelectedDate('custom');
+                }
+              }}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              style={{ fontSize: '16px' }} // Prevents iOS zooming on focus
+            />
+          </div>
         </div>
 
         {/* ── Big Localized Date ── */}
@@ -380,12 +501,7 @@ export function TimelineTab() {
           className="mb-6 mt-2 px-1"
         >
           <h1 className="text-xl font-bold" style={{ color: '#0F172A' }}>
-            {new Intl.DateTimeFormat(KO ? 'ko-KR' : 'en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              weekday: 'long',
-            }).format(new Date())}
+            {getHeaderDateText()}
           </h1>
           <div className="w-8 h-1 rounded-full mt-1" style={{ background: '#3E6D52' }} />
         </motion.div>

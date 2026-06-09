@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, Component, ErrorInfo, ReactNode, u
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer } from 'lucide-react';
 import { useApp, ActivityType } from '../App';
-import { SparklineChart } from './Charts';
 import * as htmlToImage from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
@@ -48,30 +47,41 @@ interface DogEngineResult {
 function runDogEngine(
   name: string,
   ageMonths: number,
-  entries: { type: ActivityType }[],
+  entries: { type: ActivityType; value?: number }[],
   lang: 'KO' | 'EN'
 ): DogEngineResult {
   const KO = lang === 'KO';
   const counts: Record<ActivityType, number> = {
     meal: 0, walk: 0, sleep: 0, toilet: 0, vet: 0, bath: 0, other: 0,
   };
-  entries.forEach(e => counts[e.type]++);
+  const totals = {
+    meal: 0, walk: 0, sleep: 0
+  };
+
+  entries.forEach(e => {
+    counts[e.type]++;
+    if (e.value && (e.type === 'meal' || e.type === 'walk' || e.type === 'sleep')) {
+      totals[e.type] += e.value;
+    }
+  });
 
   const isAdult = ageMonths >= 12 && ageMonths < 84;
   const isPuppy = ageMonths < 12;
   const isSenior = ageMonths >= 84;
 
-  // Sleep
-  const sleepStatus = counts.sleep === 0 ? 'poor' : counts.sleep === 1 ? 'good' : 'excellent';
+  // Sleep Logic: Based on total hours. (Puppy: 15-20, Adult: 12-14, Senior: 15-18)
+  // Let's use generic thresholds: < 8 is poor, 8-12 is good, > 12 is excellent.
+  const sleepStatus = totals.sleep === 0 ? 'poor' : totals.sleep < 8 ? 'poor' : totals.sleep <= 12 ? 'good' : 'excellent';
   const sleepLabel = { 
     poor: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '부족' : 'Poor'}</span>, 
     good: <span className="flex items-center justify-center gap-1"><CheckCircle2 size={12}/> {KO ? '양호' : 'Good'}</span>, 
-    excellent: <span className="flex items-center justify-center gap-1"><Heart size={12}/> {KO ? '최상' : 'Excellent'}</span> 
+    excellent: <span className="flex items-center justify-center gap-1"><Heart size={12}/> {KO ? '충분' : 'Excellent'}</span> 
   }[sleepStatus];
   const sleepColor = { poor: '#EF4444', good: '#0EA5E9', excellent: '#7C3AED' }[sleepStatus];
 
-  // Diet
-  const dietStatus = counts.meal === 0 ? 'emergency' : counts.meal === 1 ? 'low' : counts.meal === 2 ? 'good' : 'high';
+  // Diet Logic: Based on total grams.
+  // Assuming a generic threshold: < 50g emergency, 50-100g low, 100-250g good, > 250g high
+  const dietStatus = totals.meal === 0 ? 'emergency' : totals.meal < 50 ? 'low' : totals.meal <= 250 ? 'good' : 'high';
   const dietLabel = { 
     emergency: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '긴급' : 'Emergency'}</span>, 
     low: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '부족' : 'Low'}</span>, 
@@ -80,8 +90,9 @@ function runDogEngine(
   }[dietStatus];
   const dietColor = { emergency: '#EF4444', low: '#F59E0B', good: '#10B981', high: '#7C3AED' }[dietStatus];
 
-  // Activity
-  const actStatus = counts.walk === 0 ? 'zero' : counts.walk === 1 ? 'low' : counts.walk === 2 ? 'good' : 'high';
+  // Activity (Walk) Logic: Based on total minutes.
+  // 0 mins zero, < 20 mins low, 20-60 mins good, > 60 mins high
+  const actStatus = totals.walk === 0 ? 'zero' : totals.walk < 20 ? 'low' : totals.walk <= 60 ? 'good' : 'high';
   const actLabel = { 
     zero: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '없음' : 'None'}</span>, 
     low: <span className="flex items-center justify-center gap-1"><AlertTriangle size={12}/> {KO ? '부족' : 'Low'}</span>, 
@@ -91,45 +102,45 @@ function runDogEngine(
   const actColor = { zero: '#EF4444', low: '#F59E0B', good: '#10B981', high: '#0EA5E9' }[actStatus];
 
   // Wellness score
-  const sleepScore = { poor: 25, good: 50, excellent: 100 }[sleepStatus];
-  const dietScore  = { emergency: 0, low: 30, good: 70, high: 90 }[dietStatus];
-  const actScore   = { zero: 0, low: 40, good: 80, high: 95 }[actStatus];
+  const sleepScore = { poor: 25, good: 70, excellent: 100 }[sleepStatus];
+  const dietScore  = { emergency: 0, low: 40, good: 90, high: 70 }[dietStatus];
+  const actScore   = { zero: 0, low: 40, good: 95, high: 80 }[actStatus];
   const wellnessScore = Math.round((sleepScore + dietScore + actScore) / 3);
 
   // Coaching cards
   const coaching: DogEngineResult['coaching'] = [];
 
-  if (counts.meal >= 2 && counts.walk >= 1 && counts.sleep >= 1) {
+  if (totals.meal >= 100 && totals.walk >= 30 && totals.sleep >= 10) {
     coaching.push({
       title: KO ? `Perfect Day!` : `Perfect Day!`,
       desc: KO
-        ? `${name}가 균형 잡힌 하루를 보냈어요. 식사, 산책, 수면 모두 완벽합니다!`
-        : `${name} had a perfectly balanced day. Meals, walks, and sleep — all excellent!`,
+        ? `${name}가 식사 ${totals.meal}g, 산책 ${totals.walk}분, 수면 ${totals.sleep}시간으로 완벽한 균형을 이뤘어요!`
+        : `${name} achieved perfect balance with ${totals.meal}g food, ${totals.walk}m walk, and ${totals.sleep}h sleep!`,
       color: '#5BAD6F', icon: '', type: 'good',
     });
   }
 
-  if (isPuppy && counts.walk >= 3) {
+  if (isPuppy && totals.walk >= 60) {
     coaching.push({
       title: KO ? '퍼피 관절 주의보' : 'Puppy Joint Alert',
       desc: KO
-        ? `성장 중인 퍼피의 관절은 아직 약해요. 하루 산책은 2회 이내가 이상적입니다.`
-        : `Puppy joints are still developing. Limit walks to 2 times per day.`,
+        ? `성장 중인 퍼피가 오늘 ${totals.walk}분이나 산책했어요! 무리한 산책은 관절에 안 좋아요.`
+        : `Your puppy walked ${totals.walk} mins today. Too much walking can hurt developing joints.`,
       color: '#E88B5B', icon: '', type: 'warning',
     });
   }
 
-  if (isSenior && counts.walk >= 3) {
+  if (isSenior && totals.walk >= 60) {
     coaching.push({
       title: KO ? '노령견 과활동 경고' : 'Senior Dog Overactivity',
       desc: KO
-        ? `노령견에게는 짧고 여유로운 산책이 좋아요. 관절 건강을 위해 쉬는 시간을 늘려주세요.`
-        : `Shoter, leisurely walks are better for senior dogs. Allow more rest time.`,
+        ? `노령견이 하루 ${totals.walk}분을 걷는 것은 무리가 될 수 있어요. 휴식을 늘려주세요.`
+        : `Walking ${totals.walk} mins might be too much for a senior dog. Allow more rest.`,
       color: '#E87B7B', icon: '', type: 'warning',
     });
   }
 
-  if (counts.walk === 0) {
+  if (totals.walk === 0) {
     coaching.push({
       title: KO ? '활동량 부족 경고' : 'No Activity Warning',
       desc: KO
@@ -137,24 +148,42 @@ function runDogEngine(
         : `No walks recorded today. Even a short outdoor time makes a big difference.`,
       color: '#E87B7B', icon: '', type: 'warning',
     });
+  } else if (totals.walk < 20) {
+    coaching.push({
+      title: KO ? '짧은 산책' : 'Short Walk',
+      desc: KO
+        ? `오늘 총 ${totals.walk}분 산책했어요. 컨디션이 좋다면 조금 더 늘려봐도 좋겠어요.`
+        : `Walked only ${totals.walk} mins today. Try a longer walk if condition allows.`,
+      color: '#E88B5B', icon: '', type: 'warning',
+    });
+  }
+
+  if (totals.sleep > 0 && totals.sleep < 8) {
+    coaching.push({
+      title: KO ? '수면 시간 부족' : 'Not Enough Sleep',
+      desc: KO
+        ? `오늘 총 ${totals.sleep}시간 잤어요. 강아지는 사람보다 더 많은 수면이 필요해요.`
+        : `Slept only ${totals.sleep} hours. Dogs need more sleep than humans.`,
+      color: '#E88B5B', icon: '', type: 'warning',
+    });
   }
 
   if (counts.vet > 0) {
     coaching.push({
       title: KO ? '병원 스트레스 케어' : 'Post-Vet Stress Care',
       desc: KO
-        ? `병원 방문 후 ${name}가 스트레스를 받았을 수 있어요. 조용하고 편안한 환경을 만들어주세요.`
-        : `${name} may be stressed after the vet visit. Create a calm, comfortable environment.`,
+        ? `병원 방문 후 ${name}가 스트레스를 받았을 수 있어요. 편안한 휴식을 취하게 해주세요.`
+        : `${name} may be stressed after the vet visit. Allow for comfortable rest.`,
       color: '#9B7BC8', icon: '', type: 'info',
     });
   }
 
   if (coaching.length === 0) {
     coaching.push({
-      title: KO ? '분석 데이터 부족' : 'More Data Needed',
+      title: KO ? '무난한 하루' : 'A Normal Day',
       desc: KO
-        ? '더 많은 활동을 기록하면 맞춤 코칭을 받을 수 있어요!'
-        : 'Record more activities to get personalized coaching!',
+        ? `오늘 하루 식사 ${totals.meal}g, 산책 ${totals.walk}분, 수면 ${totals.sleep}시간을 기록했어요.`
+        : `Recorded ${totals.meal}g meals, ${totals.walk}m walks, ${totals.sleep}h sleep.`,
       color: '#8a897e', icon: '', type: 'info',
     });
   }
@@ -292,8 +321,12 @@ export function InsightsTab() {
   const [result, setResult] = useState<DogEngineResult | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
- 
-  const todayEntries = timeline.filter(e => e.petId === pet.id && e.date === '2026-05-04');
+  const todayStr = useMemo(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }, []);
+  
+  const todayEntries = timeline.filter(e => e.petId === pet.id && e.date === todayStr);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
  

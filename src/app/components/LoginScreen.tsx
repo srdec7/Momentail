@@ -3,11 +3,12 @@ import { motion } from 'motion/react';
 import { Crown, Eye, EyeOff, ChevronRight, Sparkles, ClipboardList, Headphones } from 'lucide-react';
 import { useApp } from '../App';
 import { supabase } from '../../lib/supabase';
+import { PlaylistButton } from './MainShell';
 
 interface Props { onLogin: (user?: any) => void; }
 
 export function LoginScreen({ onLogin }: Props) {
-  const { lang, setLang, setShowPremiumModal } = useApp();
+  const { lang, setLang, setShowPremiumModal, isPremium } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -25,7 +26,9 @@ export function LoginScreen({ onLogin }: Props) {
     let targetPassword = password;
 
     // Master Key: instant bypass, no Supabase call needed
-    if (targetEmail === 'master0827' || targetEmail === '[master0827]' || password === '[master0827]') {
+    const isMasterEmail = targetEmail.toLowerCase() === 'master0827' || targetEmail.toLowerCase() === '[master0827]';
+    const isMasterPassword = password.toLowerCase() === 'master0827' || password.toLowerCase() === '[master0827]';
+    if (isMasterEmail || isMasterPassword) {
       onLogin({ id: null, email: 'master@petory.app' });
       return;
     }
@@ -110,20 +113,8 @@ export function LoginScreen({ onLogin }: Props) {
           ))}
         </div>
 
-        {/* Premium badge (Midnight Green) */}
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowPremiumModal(true)}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold"
-          style={{
-            background: 'linear-gradient(135deg, #2A3638 0%, #1A2426 100%)',
-            color: '#fff',
-            boxShadow: '0 4px 15px rgba(26,36,38,0.25)',
-          }}
-        >
-          <Crown size={12} strokeWidth={2.5} />
-          {KO ? '프리미엄' : 'Premium'}
-        </motion.button>
+        {/* Playlist Button */}
+        <PlaylistButton />
       </div>
       {/* ── Hero Section (Floating Logo Only) ── */}
       <div className="relative z-10 flex flex-col items-center mt-0 sm:mt-8 mb-0 sm:mb-2 px-6 text-center">

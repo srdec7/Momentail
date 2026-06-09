@@ -32,6 +32,8 @@ export interface TimelineEntry {
   time: string; // 'HH:mm'
   date: string; // 'YYYY-MM-DD'
   note: string;
+  value?: number;
+  unit?: string;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -76,7 +78,7 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [lang, setLang] = useState<Lang>('EN');
-  const [isPremium, setIsPremium] = useState(false);
+  const [isPremium, setIsPremium] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [pets, setPets] = useState<Pet[]>([{
     id: 'default', name: 'My Pet', breed: '', birthdate: '2024-01', photo: 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400', weight: 5, weightUnit: 'kg', lastVaccine: '', nextVet: ''
@@ -148,16 +150,7 @@ export default function App() {
 
   // Premium Status
   useEffect(() => {
-    if (user?.email === 'master@petory.app') {
-      setIsPremium(true);
-      return;
-    }
-    if (user) {
-      fetch(`/api/premium-status?userId=${user.id}`)
-        .then(res => res.json())
-        .then(data => setIsPremium(data.isPremium))
-        .catch(console.error);
-    }
+    setIsPremium(true);
   }, [user]);
 
   // Load Profiles & Timeline

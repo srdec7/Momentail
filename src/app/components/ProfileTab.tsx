@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Edit2, Scale, Syringe, Stethoscope, Baby, RefreshCw, Crown, ChevronRight, Camera } from 'lucide-react';
+import { Edit2, Scale, Syringe, Stethoscope, Baby, RefreshCw, Crown, ChevronRight, Camera, Sparkles } from 'lucide-react';
 import { useApp } from '../App';
 import { saveProfile } from '../../lib/api';
 
@@ -131,9 +131,20 @@ export function ProfileTab() {
             </div>
 
             <div className="flex-1 pt-0.5">
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-xl font-bold text-white">{pet?.name}</h2>
-                <button onClick={handleEditPet} style={{ color: 'rgba(255,255,255,0.5)' }}><Edit2 size={13} /></button>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-white">{pet?.name}</h2>
+                  <button onClick={handleEditPet} style={{ color: 'rgba(255,255,255,0.5)' }}><Edit2 size={13} /></button>
+                </div>
+                {/* App Features Button */}
+                <button 
+                  onClick={() => setShowPremiumModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-transform active:scale-95"
+                  style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}
+                >
+                  <Sparkles size={12} style={{ color: '#FCD34D' }} />
+                  {KO ? '앱 기능' : 'Features'}
+                </button>
               </div>
               <p className="text-sm mb-2.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {pet?.breed || (lang === 'KO' ? '견종 미입력' : 'No breed set')}

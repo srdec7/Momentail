@@ -110,9 +110,17 @@ function LpDisc({ playing, color }: { playing: boolean; color: string }) {
 
 // ─── Audio Player Modal ────────────────────────────────────────────────────────
 export function AudioPlayerModal() {
-  const { lang, isAudioPlaying, setIsAudioPlaying, currentTrackIdx, setCurrentTrackIdx, setShowAudioModal, isPremium, setShowPremiumModal, audioCurrentTime, audioDuration, seekAudio } = useApp();
+  const { lang, isAudioPlaying, setIsAudioPlaying, currentTrackIdx, setCurrentTrackIdx, setShowAudioModal, isPremium, setShowPremiumModal, audioCurrentTime, audioDuration, seekAudio, user } = useApp();
   const KO = lang === 'KO';
   const [selectedCat, setSelectedCat] = useState<CatId>('sleep');
+
+  const requireLogin = () => {
+    if (!user) {
+      alert(KO ? '로그인 후 플레이할 수 있습니다.' : 'Please log in to play music.');
+      return true;
+    }
+    return false;
+  };
 
   const progress = audioDuration > 0 ? (audioCurrentTime / audioDuration) * 100 : 0;
 
@@ -133,6 +141,7 @@ export function AudioPlayerModal() {
   const catTracks = TRACKS.filter(t => t.category === selectedCat);
 
   const handleTrackClick = (t: Track) => {
+    if (requireLogin()) return;
     if (!t.free && !isPremium) {
       setShowPremiumModal(true);
       return;
@@ -142,6 +151,7 @@ export function AudioPlayerModal() {
   };
 
   const handlePrev = () => {
+    if (requireLogin()) return;
     const prevIdx = (currentTrackIdx - 1 + TRACKS.length) % TRACKS.length;
     const prev = TRACKS[prevIdx];
     if (!prev.free && !isPremium) { setShowPremiumModal(true); return; }
@@ -149,6 +159,7 @@ export function AudioPlayerModal() {
   };
 
   const handleNext = () => {
+    if (requireLogin()) return;
     const nextIdx = (currentTrackIdx + 1) % TRACKS.length;
     const next = TRACKS[nextIdx];
     if (!next.free && !isPremium) { setShowPremiumModal(true); return; }
@@ -229,7 +240,10 @@ export function AudioPlayerModal() {
             </button>
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => setIsAudioPlaying(!isAudioPlaying)}
+              onClick={() => {
+                if (requireLogin()) return;
+                setIsAudioPlaying(!isAudioPlaying);
+              }}
               className="w-14 h-14 rounded-full flex items-center justify-center"
               style={{
                 background: `linear-gradient(135deg, ${track.color}, ${track.color}99)`,
