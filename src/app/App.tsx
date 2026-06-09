@@ -75,6 +75,7 @@ export const useApp = () => useContext(AppContext);
 // ─── App Component ────────────────────────────────────────────────────────────
 export default function App() {
   const [user, setUser] = useState<any>(null);
+  const [petsLoaded, setPetsLoaded] = useState(false);
   const [lang, setLang] = useState<Lang>('EN');
   const [isPremium, setIsPremium] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -133,56 +134,67 @@ export default function App() {
     }
   }, [lang]);
 
-  // ─── Local-First Initialization ─────────────────────────────────────────────
-  // On mount, check localStorage for existing profiles.
-  // If profiles exist, auto-enter the app. Otherwise show the registration screen.
+  // ─── Local-First Initialization ────────────────────────────────────────────────
+  // On mount: load pets FIRST, then set user so MainShell always has pets ready.
   useEffect(() => {
     const premiumStatus = localStorage.getItem('petory_premium') === 'true';
     setIsPremium(premiumStatus);
-    
+
     getProfiles().then((profiles) => {
       if (profiles && profiles.length > 0) {
+        const loadedPets: Pet[] = profiles.map((p: any) => ({
+          id: p.id,
+          name: p.name || 'My Pet',
+          breed: p.breed || '',
+          birthdate: p.birthdate || '2024-01',
+          photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+          weight: parseFloat(p.weight) || 0,
+          weightUnit: p.weightUnit || 'kg',
+          lastVaccine: p.lastVaccine || '',
+          nextVet: p.nextVet || ''
+        }));
+        setPets(loadedPets);
+        setPetsLoaded(true);
         setUser({ isLocal: true });
       }
     }).catch(console.error);
   }, []);
 
-  // ─── Load Profiles & Timeline from localStorage ────────────────────────────
+  // ─── Reload profiles & timeline on tab/pet change ────────────────────────────
   useEffect(() => {
-    if (user) {
-      getProfiles().then(async (profiles) => {
-        if (profiles && profiles.length > 0) {
-          const loadedPets: Pet[] = profiles.map((p: any) => ({
-            id: p.id,
-            name: p.name || 'My Pet',
-            breed: p.breed || '',
-            birthdate: p.birthdate || '2024-01',
-            photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-            weight: parseFloat(p.weight) || 0,
-            weightUnit: p.weightUnit || 'kg',
-            lastVaccine: p.lastVaccine || '',
-            nextVet: p.nextVet || ''
-          }));
-          setPets(loadedPets);
-          
-          const currentPet = loadedPets[selectedPetIdx];
-          if (currentPet) {
-            const tl = await getTimeline(currentPet.id);
-            setTimeline(tl.map((t: any) => ({
-              id: t.id,
-              petId: t.profileId,
-              type: t.type,
-              time: t.time,
-              date: t.date,
-              note: t.note || '',
-              value: t.value,
-              unit: t.unit,
-            })));
-          }
+    if (!user || !petsLoaded) return;
+    getProfiles().then(async (profiles) => {
+      if (profiles && profiles.length > 0) {
+        const loadedPets: Pet[] = profiles.map((p: any) => ({
+          id: p.id,
+          name: p.name || 'My Pet',
+          breed: p.breed || '',
+          birthdate: p.birthdate || '2024-01',
+          photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+          weight: parseFloat(p.weight) || 0,
+          weightUnit: p.weightUnit || 'kg',
+          lastVaccine: p.lastVaccine || '',
+          nextVet: p.nextVet || ''
+        }));
+        setPets(loadedPets);
+
+        const currentPet = loadedPets[selectedPetIdx];
+        if (currentPet) {
+          const tl = await getTimeline(currentPet.id);
+          setTimeline(tl.map((t: any) => ({
+            id: t.id,
+            petId: t.profileId,
+            type: t.type,
+            time: t.time,
+            date: t.date,
+            note: t.note || '',
+            value: t.value,
+            unit: t.unit,
+          })));
         }
-      }).catch(console.error);
-    }
-  }, [user, activeTab, selectedPetIdx]);
+      }
+    }).catch(console.error);
+  }, [activeTab, selectedPetIdx]);
 
   const ctx: AppContextType = {
     user,
@@ -227,7 +239,32 @@ export default function App() {
           }}
         >
           {!user ? (
-            <LoginScreen onLogin={(usr) => { if(usr) setUser(usr) }} />
+            <LoginScreen onLogin={(usr) => {
+              if (usr) {
+                // Load pets before showing MainShell
+                getProfiles().then((profiles) => {
+                  if (profiles && profiles.length > 0) {
+                    const loadedPets: Pet[] = profiles.map((p: any) => ({
+                      id: p.id,
+                      name: p.name || 'My Pet',
+                      breed: p.breed || '',
+                      birthdate: p.birthdate || '2024-01',
+                      photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+                      weight: parseFloat(p.weight) || 0,
+                      weightUnit: p.weightUnit || 'kg',
+                      lastVaccine: p.lastVaccine || '',
+                      nextVet: p.nextVet || ''
+                    }));
+                    setPets(loadedPets);
+                  }
+                  setPetsLoaded(true);
+                  setUser(usr);
+                }).catch(() => {
+                  setPetsLoaded(true);
+                  setUser(usr);
+                });
+              }
+            }} />
           ) : (
             <MainShell />
           )}
