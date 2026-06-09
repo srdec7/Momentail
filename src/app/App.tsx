@@ -134,8 +134,9 @@ export default function App() {
     }
   }, [lang]);
 
-  // ─── Local-First Initialization ────────────────────────────────────────────────
-  // On mount: load pets FIRST, then set user so MainShell always has pets ready.
+  // ─── Local-First Initialization ──────────────────────────────────────────────────
+  // On mount: preload pets into state so LoginScreen can detect returning users.
+  // Always show LoginScreen first - user must tap to enter.
   useEffect(() => {
     const premiumStatus = localStorage.getItem('petory_premium') === 'true';
     setIsPremium(premiumStatus);
@@ -155,7 +156,7 @@ export default function App() {
         }));
         setPets(loadedPets);
         setPetsLoaded(true);
-        setUser({ isLocal: true });
+        // Do NOT set user here - always show first screen first
       }
     }).catch(console.error);
   }, []);

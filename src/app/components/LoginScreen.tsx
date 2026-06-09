@@ -8,13 +8,19 @@ import { PlaylistButton } from './MainShell';
 interface Props { onLogin: (user?: any) => void; }
 
 export function LoginScreen({ onLogin }: Props) {
-  const { lang, setLang } = useApp();
+  const { lang, setLang, pets } = useApp();
   const [dogName, setDogName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   const KO = lang === 'KO';
+  const isReturningUser = pets && pets.length > 0;
+  const firstPetName = pets?.[0]?.name || '';
+
+  const handleContinue = () => {
+    onLogin({ isLocal: true });
+  };
 
   const handleRegister = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -114,7 +120,7 @@ export function LoginScreen({ onLogin }: Props) {
           }}
           style={{ willChange: 'transform, opacity' }}
         >
-          <form
+          <div
             className="rounded-[40px] px-7 py-5"
             style={{
               background: 'rgba(255, 255, 255, 0.65)',
@@ -123,64 +129,108 @@ export function LoginScreen({ onLogin }: Props) {
               border: '1px solid rgba(255, 255, 255, 0.6)',
               boxShadow: '0 20px 40px -10px rgba(26, 36, 38, 0.1)',
             }}
-            onSubmit={handleRegister}
           >
-            <h2 className="mb-4 text-[#1A2426] text-[1.25rem] font-black text-center tracking-tight">
-              {KO ? '나의 반려견 등록하기' : 'Register My Dog'}
-            </h2>
+            {isReturningUser ? (
+              /* ── Returning User UI ── */
+              <>
+                <div className="text-center mb-5">
+                  <p className="text-[12px] font-bold uppercase tracking-widest mb-1" style={{ color: '#8a897e' }}>
+                    {KO ? '다시 돌아오셨군요!' : 'Welcome back!'}
+                  </p>
+                  <h2 className="text-[1.3rem] font-black text-[#1A2426] tracking-tight">
+                    {KO ? `${firstPetName}의 케어를` : `Continue caring`}
+                  </h2>
+                  <h2 className="text-[1.3rem] font-black text-[#1A2426] tracking-tight">
+                    {KO ? '이어서 시작할게요 🐾' : `for ${firstPetName} 🐾`}
+                  </h2>
+                </div>
 
-            {/* Dog Name Field */}
-            <div className="mb-4">
-              <label className="block text-[12px] mb-1 font-bold uppercase tracking-wider pl-1" style={{ color: '#1F2937' }}>
-                {KO ? '반려견 이름' : 'Dog Name'}
-              </label>
-              <input
-                type="text"
-                value={dogName}
-                onChange={e => setDogName(e.target.value)}
-                onFocus={() => setFocusedField('name')}
-                onBlur={() => setFocusedField(null)}
-                placeholder={KO ? '예: 초코, 보리' : 'e.g. Max, Bella'}
-                className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all duration-300"
-                style={{
-                  background: 'rgba(255,255,255,0.85)',
-                  border: `2px solid ${focusedField === 'name' ? '#1A2426' : 'transparent'}`,
-                  color: '#111827',
-                }}
-              />
-              {error && <p className="text-red-500 text-xs mt-1 pl-1 font-medium">{error}</p>}
-            </div>
-
-            {/* Start Button (Midnight Green) */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3.5 rounded-2xl text-[14px] font-bold relative overflow-hidden flex items-center justify-center gap-2"
-              style={{
-                background: isLoading
-                  ? '#9CA3AF'
-                  : 'linear-gradient(135deg, #2A3638 0%, #1A2426 100%)',
-                color: '#fff',
-                boxShadow: isLoading ? 'none' : '0 10px 20px -5px rgba(26,36,38,0.3)',
-              }}
-            >
-              {isLoading ? (
-                <RefreshCw size={18} className="animate-spin" />
-              ) : (
-                <>
-                  <span>{KO ? '케어 시작하기' : 'Start Caring'}</span>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleContinue}
+                  className="w-full py-3.5 rounded-2xl text-[14px] font-bold flex items-center justify-center gap-2 mb-3"
+                  style={{
+                    background: 'linear-gradient(135deg, #2A3638 0%, #1A2426 100%)',
+                    color: '#fff',
+                    boxShadow: '0 10px 20px -5px rgba(26,36,38,0.3)',
+                  }}
+                >
+                  <span>{KO ? '이어서 시작하기' : 'Continue'}</span>
                   <ChevronRight size={16} strokeWidth={3} />
-                </>
-              )}
-            </motion.button>
+                </motion.button>
 
-            <p className="text-center text-[10px] mt-2.5 font-medium" style={{ color: '#6B7280' }}>
-              {KO
-                ? '모든 기록은 이 기기에만 안전하게 저장됩니다.'
-                : 'All records are stored locally on your device.'}
-            </p>
-          </form>
+                <button
+                  onClick={() => {
+                    const name = prompt(KO ? '새 반려견 이름을 입력하세요:' : 'Enter new dog name:');
+                    if (name && name.trim()) {
+                      saveProfile({ name: name.trim() }).then(() => onLogin({ isLocal: true }));
+                    }
+                  }}
+                  className="w-full py-2 text-[12px] font-medium text-center"
+                  style={{ color: '#8a897e' }}
+                >
+                  {KO ? '+ 새 반려견 추가하기' : '+ Add another dog'}
+                </button>
+              </>
+            ) : (
+              /* ── New User Registration UI ── */
+              <form onSubmit={handleRegister}>
+                <h2 className="mb-4 text-[#1A2426] text-[1.25rem] font-black text-center tracking-tight">
+                  {KO ? '나의 반려견 등록하기' : 'Register My Dog'}
+                </h2>
+
+                <div className="mb-4">
+                  <label className="block text-[12px] mb-1 font-bold uppercase tracking-wider pl-1" style={{ color: '#1F2937' }}>
+                    {KO ? '반려견 이름' : 'Dog Name'}
+                  </label>
+                  <input
+                    type="text"
+                    value={dogName}
+                    onChange={e => setDogName(e.target.value)}
+                    onFocus={() => setFocusedField('name')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder={KO ? '예: 초코, 보리' : 'e.g. Max, Bella'}
+                    className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all duration-300"
+                    style={{
+                      background: 'rgba(255,255,255,0.85)',
+                      border: `2px solid ${focusedField === 'name' ? '#1A2426' : 'transparent'}`,
+                      color: '#111827',
+                    }}
+                  />
+                  {error && <p className="text-red-500 text-xs mt-1 pl-1 font-medium">{error}</p>}
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3.5 rounded-2xl text-[14px] font-bold relative overflow-hidden flex items-center justify-center gap-2"
+                  style={{
+                    background: isLoading
+                      ? '#9CA3AF'
+                      : 'linear-gradient(135deg, #2A3638 0%, #1A2426 100%)',
+                    color: '#fff',
+                    boxShadow: isLoading ? 'none' : '0 10px 20px -5px rgba(26,36,38,0.3)',
+                  }}
+                >
+                  {isLoading ? (
+                    <RefreshCw size={18} className="animate-spin" />
+                  ) : (
+                    <>
+                      <span>{KO ? '케어 시작하기' : 'Start Caring'}</span>
+                      <ChevronRight size={16} strokeWidth={3} />
+                    </>
+                  )}
+                </motion.button>
+
+                <p className="text-center text-[10px] mt-2.5 font-medium" style={{ color: '#6B7280' }}>
+                  {KO
+                    ? '모든 기록은 이 기기에만 안전하게 저장됩니다.'
+                    : 'All records are stored locally on your device.'}
+                </p>
+              </form>
+            )}
+          </div>
         </motion.div>
       </div>
 
