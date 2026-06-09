@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Crown, Eye, EyeOff, ChevronRight, Sparkles, ClipboardList, Headphones } from 'lucide-react';
+import { Crown, Eye, EyeOff, ChevronRight, Sparkles, ClipboardList, Headphones, RefreshCw } from 'lucide-react';
 import { useApp } from '../App';
 import { supabase } from '../../lib/supabase';
 import { PlaylistButton } from './MainShell';
