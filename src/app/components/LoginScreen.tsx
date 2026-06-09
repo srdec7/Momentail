@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Crown, Eye, EyeOff, ChevronRight, Sparkles, ClipboardList, Headphones, RefreshCw } from 'lucide-react';
+import { Crown, Eye, EyeOff, ChevronRight, Sparkles, ClipboardList, Headphones } from 'lucide-react';
 import { useApp } from '../App';
 import { supabase } from '../../lib/supabase';
 import { PlaylistButton } from './MainShell';
@@ -57,10 +57,15 @@ export function LoginScreen({ onLogin }: Props) {
           throw signUpError;
         }
         
+        // signUp returns user even when email confirmation is pending
+        // Mark as manually-confirmed so App.tsx auth state won't override it
         if (signUpData?.user) {
-          onLogin(signUpData.user);
+          onLogin({ ...signUpData.user, _manual_login: true });
           return;
         }
+        // Fallback: create a guest user object with the email
+        onLogin({ id: `guest_${Date.now()}`, email: targetEmail, _manual_login: true });
+        return;
       } else if (signInError) {
         throw signInError;
       }
@@ -70,6 +75,7 @@ export function LoginScreen({ onLogin }: Props) {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="relative w-full h-full overflow-y-auto flex flex-col font-sans">

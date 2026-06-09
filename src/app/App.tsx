@@ -139,14 +139,21 @@ export default function App() {
   // Auth State
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
+      // Only set user from session if no manual login has happened yet
+      setUser((prev: any) => prev ?? (session?.user || null));
       setAuthChecked(true);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+      // Only override user state if it was set by Supabase (not by manual master-key or onLogin)
+      setUser((prev: any) => {
+        // If prev is a manually-set user (e.g. master key with id:null), keep it
+        if (prev && prev.id === null) return prev;
+        return session?.user || null;
+      });
     });
     return () => subscription.unsubscribe();
   }, []);
+
 
   // Premium Status
   useEffect(() => {
