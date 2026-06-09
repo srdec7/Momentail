@@ -2,7 +2,6 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Crown, ChevronDown, Plus, Check, Music, LogOut } from 'lucide-react';
 import { useApp } from '../App';
-import { supabase } from '../../lib/supabase';
 import { ProfileTab } from './ProfileTab';
 import { TimelineTab } from './TimelineTab';
 import { InsightsTab } from './InsightsTab';
@@ -141,9 +140,12 @@ function PetDropdown() {
             </div>
             <div style={{ borderTop: '1px solid rgba(44,54,57,0.08)' }}>
               <button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  window.location.reload(); // Quickest way to reset app state
+                onClick={() => {
+                  // Clear all local data and restart
+                  localStorage.removeItem('petory_profiles');
+                  localStorage.removeItem('petory_timelines');
+                  localStorage.removeItem('petory_premium');
+                  window.location.reload();
                 }}
                 className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium transition-all"
                 style={{ color: '#E87B7B' }}
