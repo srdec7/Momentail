@@ -174,7 +174,7 @@ export function LoginScreen({ onLogin }: Props) {
       </div>
 
       {/* ── Forest Glass Registration Card ── */}
-      <div className="flex-1 flex flex-col justify-center px-5 relative z-10 pb-6">
+      <div className="flex-1 flex flex-col justify-end px-5 relative z-10 pb-10 sm:pb-16">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
