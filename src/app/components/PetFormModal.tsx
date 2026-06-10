@@ -5,7 +5,7 @@ import { useApp, Pet } from '../App';
 import { saveProfile } from '../../lib/api';
 
 // ─── Default photo ─────────────────────────────────────────────────────────────
-const DEFAULT_PHOTO = 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400';
+const DEFAULT_PHOTO = '/default-dog.png';
 
 // ─── Weight unit ──────────────────────────────────────────────────────────────
 const WEIGHT_UNITS = ['kg', 'lbs'] as const;
