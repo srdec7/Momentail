@@ -1,22 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'motion/react';
-import { Crown, ChevronRight, Sparkles, ClipboardList, Headphones, RefreshCw } from 'lucide-react';
+import { Crown, ChevronRight, Sparkles, ClipboardList, Headphones, RefreshCw, Camera, Heart } from 'lucide-react';
 import { useApp } from '../App';
 import { saveProfile } from '../../lib/api';
 import { PlaylistButton } from './MainShell';
+
+const DEFAULT_PHOTO = 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400';
 
 interface Props { onLogin: (user?: any) => void; }
 
 export function LoginScreen({ onLogin }: Props) {
   const { lang, setLang, pets, setShowPrivacyPolicy } = useApp();
   const [dogName, setDogName] = useState('');
+  const [breed, setBreed] = useState('');
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState(DEFAULT_PHOTO);
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [error, setError] = useState('');
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const KO = lang === 'KO';
   const isReturningUser = pets && pets.length > 0;
   const firstPetName = pets?.[0]?.name || '';
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError(KO ? '이미지 파일만 업로드할 수 있어요.' : 'Only image files are allowed.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError(KO ? '파일 크기는 5MB 이하여야 해요.' : 'File size must be under 5MB.');
+      return;
+    }
+
+    setPhotoFile(file);
+    setError('');
+
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadPhoto = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 400;
+          const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width * ratio;
+          canvas.height = img.height * ratio;
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.75));
+        };
+        img.onerror = reject;
+        img.src = ev.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleContinue = () => {
     onLogin({ isLocal: true });
@@ -35,8 +85,23 @@ export function LoginScreen({ onLogin }: Props) {
 
     setIsLoading(true);
     try {
+      let finalPhoto = DEFAULT_PHOTO;
+      if (photoFile) {
+        finalPhoto = await uploadPhoto(photoFile);
+      }
+
       // Save the initial profile locally
-      await saveProfile({ name: targetName });
+      await saveProfile({
+        name: targetName,
+        breed: breed.trim() || (KO ? '믹스견' : 'Mixed Breed'),
+        photo: finalPhoto,
+        birthdate: '2024-01',
+        weight: 0,
+        weightUnit: 'kg',
+        lastVaccine: '',
+        nextVet: ''
+      });
+
       // Proceed to main shell
       onLogin({ isLocal: true });
     } catch (err: any) {
@@ -110,7 +175,7 @@ export function LoginScreen({ onLogin }: Props) {
       </div>
 
       {/* ── Forest Glass Registration Card ── */}
-      <div className="flex-1 flex flex-col justify-start px-5 relative z-10 pt-[85px] sm:pt-[140px]">
+      <div className="flex-1 flex flex-col justify-start px-5 relative z-10 pt-[45px] sm:pt-[100px]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -162,37 +227,104 @@ export function LoginScreen({ onLogin }: Props) {
               </>
             ) : (
               /* ── New User Registration UI ── */
-              <form onSubmit={handleRegister}>
-                <h2 className="mb-4 text-[#1A2426] text-[1.25rem] font-black text-center tracking-tight">
+              <form onSubmit={handleRegister} className="flex flex-col gap-3">
+                <h2 className="text-[#1A2426] text-[1.25rem] font-black text-center tracking-tight">
                   {KO ? '나의 반려견 등록하기' : 'Register My Dog'}
                 </h2>
+                <p className="text-center text-[11px] font-semibold text-[#8a897e] -mt-1.5 mb-2">
+                  {KO ? '반려견 정보를 입력하고 케어를 시작하세요' : 'Enter details to start personalized care'}
+                </p>
 
-                <div className="mb-4">
-                  <label className="block text-[12px] mb-1 font-bold uppercase tracking-wider pl-1" style={{ color: '#1F2937' }}>
-                    {KO ? '반려견 이름' : 'Dog Name'}
-                  </label>
-                  <input
-                    type="text"
-                    value={dogName}
-                    onChange={e => setDogName(e.target.value)}
-                    onFocus={() => setFocusedField('name')}
-                    onBlur={() => setFocusedField(null)}
-                    placeholder={KO ? '예: 초코, 보리' : 'e.g. Max, Bella'}
-                    className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all duration-300"
-                    style={{
-                      background: 'rgba(255,255,255,0.85)',
-                      border: `2px solid ${focusedField === 'name' ? '#1A2426' : 'transparent'}`,
-                      color: '#111827',
-                    }}
+                {/* ── Photo Picker ── */}
+                <div className="flex flex-col items-center mb-2">
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative w-20 h-20 rounded-full cursor-pointer group shadow-md"
+                    style={{ border: '3px solid #1A2426' }}
+                  >
+                    <img 
+                      src={photoPreview} 
+                      alt="Dog Profile Preview" 
+                      className="w-full h-full object-cover rounded-full transition-opacity group-hover:opacity-90"
+                    />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 rounded-full flex items-center justify-center transition-all">
+                      <Camera size={18} className="text-white" />
+                    </div>
+                    <div 
+                      className="absolute bottom-0 right-0 p-1 rounded-full shadow-md flex items-center justify-center"
+                      style={{ background: '#1A2426' }}
+                    >
+                      <Camera size={10} className="text-white" />
+                    </div>
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handlePhotoChange} 
+                    accept="image/*" 
+                    className="hidden" 
                   />
-                  {error && <p className="text-red-500 text-xs mt-1 pl-1 font-medium">{error}</p>}
+                  <span className="text-[9px] mt-1 font-bold uppercase tracking-wider" style={{ color: '#8a897e' }}>
+                    {KO ? '사진 등록 (선택)' : 'Add Photo (Optional)'}
+                  </span>
+                </div>
+
+                {/* ── Name Field ── */}
+                <div>
+                  <label className="block text-[11px] mb-1 font-bold uppercase tracking-wider pl-1" style={{ color: '#1F2937' }}>
+                    {KO ? '반려견 이름' : 'Dog Name'} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <Heart size={16} className="absolute left-4 text-[#8a897e]" />
+                    <input
+                      type="text"
+                      value={dogName}
+                      onChange={e => setDogName(e.target.value)}
+                      onFocus={() => setFocusedField('name')}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder={KO ? '예: 초코, 보리' : 'e.g. Max, Bella'}
+                      className="w-full pl-11 pr-4 py-2.5 rounded-2xl text-sm outline-none transition-all duration-300 font-semibold"
+                      style={{
+                        background: 'rgba(255,255,255,0.85)',
+                        border: `2px solid ${focusedField === 'name' ? '#1A2426' : 'transparent'}`,
+                        color: '#111827',
+                        boxShadow: focusedField === 'name' ? '0 0 0 4px rgba(26, 36, 38, 0.08)' : 'none',
+                      }}
+                    />
+                  </div>
+                  {error && <p className="text-red-500 text-[11px] mt-1 pl-1 font-medium">{error}</p>}
+                </div>
+
+                {/* ── Breed Field ── */}
+                <div>
+                  <label className="block text-[11px] mb-1 font-bold uppercase tracking-wider pl-1" style={{ color: '#1F2937' }}>
+                    {KO ? '견종' : 'Breed'}
+                  </label>
+                  <div className="relative flex items-center">
+                    <Sparkles size={16} className="absolute left-4 text-[#8a897e]" />
+                    <input
+                      type="text"
+                      value={breed}
+                      onChange={e => setBreed(e.target.value)}
+                      onFocus={() => setFocusedField('breed')}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder={KO ? '예: 푸들, 말티즈' : 'e.g. Poodle, Maltese'}
+                      className="w-full pl-11 pr-4 py-2.5 rounded-2xl text-sm outline-none transition-all duration-300 font-semibold"
+                      style={{
+                        background: 'rgba(255,255,255,0.85)',
+                        border: `2px solid ${focusedField === 'breed' ? '#1A2426' : 'transparent'}`,
+                        color: '#111827',
+                        boxShadow: focusedField === 'breed' ? '0 0 0 4px rgba(26, 36, 38, 0.08)' : 'none',
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3.5 rounded-2xl text-[14px] font-bold relative overflow-hidden flex items-center justify-center gap-2"
+                  className="w-full py-3.5 mt-2 rounded-2xl text-[14px] font-bold relative overflow-hidden flex items-center justify-center gap-2"
                   style={{
                     background: isLoading
                       ? '#9CA3AF'
@@ -211,7 +343,7 @@ export function LoginScreen({ onLogin }: Props) {
                   )}
                 </motion.button>
 
-                <p className="text-center text-[10px] mt-2.5 font-medium" style={{ color: '#6B7280' }}>
+                <p className="text-center text-[10px] mt-1 font-medium" style={{ color: '#6B7280' }}>
                   {KO
                     ? '모든 기록은 이 기기에만 안전하게 저장됩니다.'
                     : 'All records are stored locally on your device.'}
