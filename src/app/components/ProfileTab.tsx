@@ -140,10 +140,10 @@ export function ProfileTab() {
                 <button 
                   onClick={() => setShowPremiumModal(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-transform active:scale-95"
-                  style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}
+                  style={{ background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)', color: '#78350F', border: '1px solid rgba(252,211,77,0.5)', boxShadow: '0 4px 10px rgba(245,158,11,0.2)' }}
                 >
-                  <Sparkles size={12} style={{ color: '#FCD34D' }} />
-                  {KO ? '앱 기능' : 'Features'}
+                  <Crown size={12} style={{ color: '#78350F' }} />
+                  {KO ? 'Pro 업그레이드' : 'Pro Upgrade'}
                 </button>
               </div>
               <p className="text-sm mb-2.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
@@ -230,9 +230,8 @@ export function ProfileTab() {
                 {KO ? '무제한 프로필 · 프리미엄 오디오 · VIP 리포트' : 'Unlimited profiles · Premium audio · VIP reports'}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-[13px] line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>$9.99</span>
-                <span className="text-base font-bold text-white">$4.99</span>
-                <span className="text-[11px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#A27B5C', color: '#fff' }}>50% OFF</span>
+                <span className="text-base font-black text-white">$3.99</span>
+                <span className="text-[11px] px-1.5 py-0.5 rounded-md font-bold" style={{ background: '#A27B5C', color: '#fff' }}>One-Time</span>
               </div>
             </div>
             <button onClick={() => setShowPremiumModal(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-semibold" style={{ background: 'linear-gradient(135deg, #3E6D52, #5a9970)', color: '#fff' }}>

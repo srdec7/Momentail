@@ -46,7 +46,7 @@ function PetDropdown() {
   const current = pets[selectedPetIdx];
 
   const handleAddPet = () => {
-    if (!isPremium && pets.length >= 2) {
+    if (!isPremium && pets.length >= 1) {
       setShowProfileDropdown(false);
       setShowPremiumModal(true);
       return;
@@ -133,7 +133,7 @@ function PetDropdown() {
                   <Plus size={12} />
                 </div>
                 새 반려견 추가
-                {!isPremium && pets.length >= 2 && (
+                {!isPremium && pets.length >= 1 && (
                   <Crown size={10} className="ml-auto" style={{ color: '#A27B5C' }} />
                 )}
               </button>
