@@ -5,6 +5,7 @@ import { getProfiles, getTimeline } from '../lib/api';
 import { TRACKS, AudioPlayerModal } from './components/AudioPlayerModal';
 import { PremiumModal } from './components/PremiumModal';
 import { PetFormModal } from './components/PetFormModal';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { AnimatePresence } from 'motion/react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -62,6 +63,8 @@ export interface AppContextType {
   setShowProfileDropdown: (v: boolean) => void;
   showPetFormModal: boolean;
   setShowPetFormModal: (v: boolean) => void;
+  showPrivacyPolicy: boolean;
+  setShowPrivacyPolicy: (v: boolean) => void;
   editingPet: Pet | null;
   setEditingPet: (p: Pet | null) => void;
   audioCurrentTime: number;
@@ -88,6 +91,7 @@ export default function App() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showPetFormModal, setShowPetFormModal] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
@@ -209,6 +213,7 @@ export default function App() {
     showPremiumModal, setShowPremiumModal,
     showProfileDropdown, setShowProfileDropdown,
     showPetFormModal, setShowPetFormModal,
+    showPrivacyPolicy, setShowPrivacyPolicy,
     editingPet, setEditingPet,
     audioCurrentTime, audioDuration, seekAudio,
   };
@@ -273,6 +278,7 @@ export default function App() {
           <AnimatePresence>{showAudioModal && <AudioPlayerModal />}</AnimatePresence>
           <AnimatePresence>{showPremiumModal && <PremiumModal />}</AnimatePresence>
           <AnimatePresence>{showPetFormModal && <PetFormModal />}</AnimatePresence>
+          <AnimatePresence>{showPrivacyPolicy && <PrivacyPolicy onClose={() => setShowPrivacyPolicy(false)} />}</AnimatePresence>
         </div>
       </div>
     </AppContext.Provider>

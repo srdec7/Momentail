@@ -8,7 +8,7 @@ import { PlaylistButton } from './MainShell';
 interface Props { onLogin: (user?: any) => void; }
 
 export function LoginScreen({ onLogin }: Props) {
-  const { lang, setLang, pets } = useApp();
+  const { lang, setLang, pets, setShowPrivacyPolicy } = useApp();
   const [dogName, setDogName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -159,18 +159,6 @@ export function LoginScreen({ onLogin }: Props) {
                   <ChevronRight size={16} strokeWidth={3} />
                 </motion.button>
 
-                <button
-                  onClick={() => {
-                    const name = prompt(KO ? '새 반려견 이름을 입력하세요:' : 'Enter new dog name:');
-                    if (name && name.trim()) {
-                      saveProfile({ name: name.trim() }).then(() => onLogin({ isLocal: true }));
-                    }
-                  }}
-                  className="w-full py-2 text-[12px] font-medium text-center"
-                  style={{ color: '#8a897e' }}
-                >
-                  {KO ? '+ 새 반려견 추가하기' : '+ Add another dog'}
-                </button>
               </>
             ) : (
               /* ── New User Registration UI ── */
@@ -253,6 +241,14 @@ export function LoginScreen({ onLogin }: Props) {
         <p className="text-[11px] font-semibold" style={{ color: '#1A2426', opacity: 0.8 }}>
           {KO ? '반려견의 건강을 기록하고 사랑을 나누세요' : 'Cherish every moment with your dog'}
         </p>
+        <button
+          type="button"
+          onClick={() => setShowPrivacyPolicy(true)}
+          className="mt-3 text-[10px] font-medium underline"
+          style={{ color: '#1A2426', opacity: 0.6 }}
+        >
+          {KO ? '개인정보처리방침' : 'Privacy Policy'}
+        </button>
       </div>
     </div>
   );

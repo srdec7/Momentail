@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Camera, Check, ChevronDown, Loader2, HelpCircle } from 'lucide-react';
+import { X, Camera, Check, ChevronDown, Loader2, HelpCircle, Heart, Activity, Calendar } from 'lucide-react';
 import { useApp, Pet } from '../App';
 import { saveProfile } from '../../lib/api';
 
@@ -311,7 +311,15 @@ export function PetFormModal() {
               </div>
             </div>
 
-            {/* ── Name ── */}
+            {/* ── Basic Info Section ── */}
+            <div className="bg-white/40 rounded-2xl p-4 mb-4 border border-[#2C3639]/10 shadow-sm">
+              <h4 className="text-[14px] font-bold text-[#2C3639] mb-4 flex items-center gap-2">
+                <div className="p-1.5 rounded-lg" style={{ background: 'rgba(162,123,92,0.15)' }}>
+                  <Heart size={16} color="#A27B5C" />
+                </div>
+                {KO ? '기본 정보' : 'Basic Identity'}
+              </h4>
+              {/* ── Name ── */}
             <FieldGroup label={KO ? '이름 *' : 'Name *'}>
               <StyledInput
                 value={name}
@@ -339,7 +347,17 @@ export function PetFormModal() {
               />
             </FieldGroup>
 
-            {/* ── Weight ── */}
+            </div>
+
+            {/* ── Vitals Section ── */}
+            <div className="bg-white/40 rounded-2xl p-4 mb-4 border border-[#2C3639]/10 shadow-sm">
+              <h4 className="text-[14px] font-bold text-[#2C3639] mb-4 flex items-center gap-2">
+                <div className="p-1.5 rounded-lg" style={{ background: 'rgba(162,123,92,0.15)' }}>
+                  <Activity size={16} color="#A27B5C" />
+                </div>
+                {KO ? '건강 수치' : 'Health Vitals'}
+              </h4>
+              {/* ── Weight ── */}
             <FieldGroup label={KO ? '체중' : 'Weight'}>
               <div className="flex gap-2">
                 <StyledInput
@@ -371,7 +389,17 @@ export function PetFormModal() {
               </div>
             </FieldGroup>
 
-            {/* ── Last Vaccine ── */}
+            </div>
+
+            {/* ── Vet Section ── */}
+            <div className="bg-white/40 rounded-2xl p-4 mb-4 border border-[#2C3639]/10 shadow-sm">
+              <h4 className="text-[14px] font-bold text-[#2C3639] mb-4 flex items-center gap-2">
+                <div className="p-1.5 rounded-lg" style={{ background: 'rgba(162,123,92,0.15)' }}>
+                  <Calendar size={16} color="#A27B5C" />
+                </div>
+                {KO ? '병원 및 예방접종' : 'Vet Schedule'}
+              </h4>
+              {/* ── Last Vaccine ── */}
             <FieldGroup label={KO ? '마지막 접종일' : 'Last Vaccine Date'}>
               <StyledInput
                 type="date"
@@ -388,6 +416,8 @@ export function PetFormModal() {
                 onChange={e => setNextVet(e.target.value)}
               />
             </FieldGroup>
+
+            </div>
 
             {/* ── Error ── */}
             <AnimatePresence>
@@ -464,7 +494,7 @@ function StyledInput({ className = '', ...props }: React.InputHTMLAttributes<HTM
       {...props}
       className={`w-full px-4 py-3 rounded-xl text-base outline-none transition-all ${className}`}
       style={{
-        background: 'rgba(255,255,255,0.6)',
+        background: 'rgba(255,255,255,0.8)',
         border: '1.5px solid rgba(44,54,57,0.12)',
         color: '#2C3639',
         caretColor: '#A27B5C',
