@@ -197,12 +197,14 @@ function TimelineItem({ entry, index }: EntryProps) {
   const cfg = ACTIVITY_CONFIG[entry.type];
   const [isEditing, setIsEditing] = useState(false);
   const [editNote, setEditNote] = useState(entry.note);
+  const [editValue, setEditValue] = useState(entry.value !== undefined ? String(entry.value) : '');
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const saveEdit = async () => {
-    setTimeline(prev => prev.map(e => e.id === entry.id ? { ...e, note: editNote } : e));
+    const parsedValue = editValue !== '' ? Number(editValue) : undefined;
+    setTimeline(prev => prev.map(e => e.id === entry.id ? { ...e, note: editNote, value: parsedValue } : e));
     setIsEditing(false);
-    try { await updateTimelineEntry(entry.id, { note: editNote }); } catch(e) { console.error(e); }
+    try { await updateTimelineEntry(entry.id, { note: editNote, value: parsedValue }); } catch(e) { console.error(e); }
   };
 
   const deleteEntry = async () => {
@@ -274,16 +276,33 @@ function TimelineItem({ entry, index }: EntryProps) {
               </div>
 
               {isEditing ? (
-                <div className="flex gap-1.5 mt-2">
-                  <input
-                    autoFocus
-                    value={editNote}
-                    onChange={e => setEditNote(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setIsEditing(false); }}
-                    className="flex-1 text-sm px-3 py-1.5 rounded-xl outline-none font-medium"
-                    style={{ background: '#F5F7F6', color: '#1A2421', border: `1.5px solid ${cfg.color}` }}
-                  />
-                  <button onClick={saveEdit} className="p-1.5"><Check size={18} style={{ color: '#45B649' }} /></button>
+                <div className="flex flex-col gap-2 mt-2">
+                  {entry.value !== undefined && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] font-semibold" style={{ color: '#64748B' }}>{KO ? '수치 변경:' : 'Value:'}</span>
+                      <input
+                        type="number"
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setIsEditing(false); }}
+                        className="w-20 text-sm px-2 py-1 rounded-lg outline-none font-medium"
+                        style={{ background: '#F5F7F6', color: '#1A2421', border: `1px solid ${cfg.color}` }}
+                      />
+                      <span className="text-[12px] font-medium" style={{ color: '#64748B' }}>{entry.unit}</span>
+                    </div>
+                  )}
+                  <div className="flex gap-1.5">
+                    <input
+                      autoFocus
+                      value={editNote}
+                      onChange={e => setEditNote(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setIsEditing(false); }}
+                      className="flex-1 text-sm px-3 py-1.5 rounded-xl outline-none font-medium"
+                      style={{ background: '#F5F7F6', color: '#1A2421', border: `1.5px solid ${cfg.color}` }}
+                      placeholder={KO ? "메모..." : "Note..."}
+                    />
+                    <button onClick={saveEdit} className="p-1.5"><Check size={18} style={{ color: '#45B649' }} /></button>
+                  </div>
                 </div>
               ) : (
                 entry.note ? (

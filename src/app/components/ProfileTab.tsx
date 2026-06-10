@@ -137,14 +137,24 @@ export function ProfileTab() {
                   <button onClick={handleEditPet} style={{ color: 'rgba(255,255,255,0.5)' }}><Edit2 size={13} /></button>
                 </div>
                 {/* App Features Button */}
-                <button 
-                  onClick={() => setShowPremiumModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-transform active:scale-95"
-                  style={{ background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)', color: '#78350F', border: '1px solid rgba(252,211,77,0.5)', boxShadow: '0 4px 10px rgba(245,158,11,0.2)' }}
-                >
-                  <Crown size={12} style={{ color: '#78350F' }} />
-                  {KO ? 'Pro 업그레이드' : 'Pro Upgrade'}
-                </button>
+                {isPremium ? (
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold cursor-default"
+                    style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)', color: '#FFFFFF', border: '1px solid rgba(59,130,246,0.5)', boxShadow: '0 4px 10px rgba(37,99,235,0.2)' }}
+                  >
+                    <Crown size={12} style={{ color: '#FFFFFF' }} />
+                    {KO ? 'PRO 사용자' : 'PRO User'}
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setShowPremiumModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-transform active:scale-95"
+                    style={{ background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)', color: '#78350F', border: '1px solid rgba(252,211,77,0.5)', boxShadow: '0 4px 10px rgba(245,158,11,0.2)' }}
+                  >
+                    <Crown size={12} style={{ color: '#78350F' }} />
+                    {KO ? 'Pro 업그레이드' : 'Pro Upgrade'}
+                  </button>
+                )}
               </div>
               <p className="text-sm mb-2.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {pet?.breed || (lang === 'KO' ? '견종 미입력' : 'No breed set')}
