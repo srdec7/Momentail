@@ -111,7 +111,7 @@ export function LoginScreen({ onLogin }: Props) {
   };
 
   return (
-    <div className="relative w-full h-full overflow-y-auto flex flex-col font-sans">
+    <div className="relative w-full h-full overflow-hidden flex flex-col font-sans">
       {/* ── Background Layer ── */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-top bg-no-repeat"
@@ -174,7 +174,7 @@ export function LoginScreen({ onLogin }: Props) {
       </div>
 
       {/* ── Forest Glass Registration Card ── */}
-      <div className="flex-1 flex flex-col justify-end px-5 relative z-10 pb-10 sm:pb-16">
+      <div className="mt-auto px-5 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
