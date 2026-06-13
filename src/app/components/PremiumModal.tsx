@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { X, Sparkles, CheckCircle2, Infinity, Music, Star, Loader2, Crown } from 'lucide-react';
 import { useApp } from '../App';
+import { purchasePro, restorePurchases, getProPrice } from '../../lib/iap';
 
 export function PremiumModal() {
   const { lang, setShowPremiumModal, setIsPremium } = useApp();
@@ -12,20 +13,52 @@ export function PremiumModal() {
     setShowPremiumModal(false);
   };
 
-  const handleUpgrade = () => {
+  const [priceString, setPriceString] = useState<string>('$3.99');
+
+  useEffect(() => {
+    getProPrice().then(price => {
+      if (price) setPriceString(price);
+    });
+  }, []);
+
+  const handleUpgrade = async () => {
     setIsProcessing(true);
-    // Simulate IAP processing delay
-    setTimeout(() => {
-      setIsPremium(true);
-      localStorage.setItem('petory_premium', 'true');
+    try {
+      const success = await purchasePro();
+      if (success) {
+        setIsPremium(true);
+        localStorage.setItem('petory_premium', 'true');
+        setShowPremiumModal(false);
+        setTimeout(() => {
+          alert(KO ? '가디언 패밀리팩 구매가 완료되었습니다! 🎉\n모든 프리미엄 기능이 잠금 해제되었습니다.' : 'Guardian Family Pack Unlocked! 🎉\nAll premium features are now available.');
+        }, 300);
+      }
+    } catch (e: any) {
+      alert(KO ? `결제 중 오류가 발생했습니다.\n${e.message}` : `Error during purchase.\n${e.message}`);
+    } finally {
       setIsProcessing(false);
-      setShowPremiumModal(false);
-      
-      // Optional: Show a brief success message
-      setTimeout(() => {
-        alert(KO ? '가디언 패밀리팩 구매가 완료되었습니다! 🎉\n모든 프리미엄 기능이 잠금 해제되었습니다.' : 'Guardian Family Pack Unlocked! 🎉\nAll premium features are now available.');
-      }, 300);
-    }, 1500);
+    }
+  };
+
+  const handleRestore = async () => {
+    setIsProcessing(true);
+    try {
+      const success = await restorePurchases();
+      if (success) {
+        setIsPremium(true);
+        localStorage.setItem('petory_premium', 'true');
+        setShowPremiumModal(false);
+        setTimeout(() => {
+          alert(KO ? '구매 내역이 성공적으로 복원되었습니다! 🎉' : 'Purchases restored successfully! 🎉');
+        }, 300);
+      } else {
+        alert(KO ? '복원할 구매 내역이 없습니다.' : 'No purchases found to restore.');
+      }
+    } catch (e: any) {
+      alert(KO ? `복원 중 오류가 발생했습니다.\n${e.message}` : `Error restoring purchases.\n${e.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const BENEFITS = [
@@ -149,7 +182,7 @@ export function PremiumModal() {
               $9.99
             </span>
             <span className="text-3xl font-black" style={{ color: '#FCD34D', textShadow: '0 2px 10px rgba(252,211,77,0.2)' }}>
-              $3.99
+              {priceString}
             </span>
             <span className="text-[11px] font-bold px-2 py-1 rounded-md" style={{ background: 'rgba(252,211,77,0.15)', color: '#FCD34D' }}>
               One-Time
@@ -178,9 +211,19 @@ export function PremiumModal() {
             )}
           </motion.button>
           
-          <p className="text-center text-[11px] mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            {KO ? '단 한 번의 결제로 평생 사용하세요. 정기결제가 아닙니다.' : 'Lifetime access with a single payment. No subscriptions.'}
-          </p>
+          <div className="flex flex-col items-center gap-3 mt-4">
+            <p className="text-center text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              {KO ? '단 한 번의 결제로 평생 사용하세요. 정기결제가 아닙니다.' : 'Lifetime access with a single payment. No subscriptions.'}
+            </p>
+            <button
+              onClick={handleRestore}
+              disabled={isProcessing}
+              className="text-[11px] font-medium underline transition-opacity"
+              style={{ color: 'rgba(255,255,255,0.4)', opacity: isProcessing ? 0.5 : 1 }}
+            >
+              {KO ? '구매 내역 복원하기 (Restore Purchases)' : 'Restore Purchases'}
+            </button>
+          </div>
         </div>
       </motion.div>
     </motion.div>

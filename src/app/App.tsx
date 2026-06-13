@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { LoginScreen } from './components/LoginScreen';
 import { MainShell } from './components/MainShell';
 import { getProfiles, getTimeline } from '../lib/api';
+import { initializeIAP, checkPremiumStatus } from '../lib/iap';
 import { TRACKS, AudioPlayerModal } from './components/AudioPlayerModal';
 import { PremiumModal } from './components/PremiumModal';
 import { PetFormModal } from './components/PetFormModal';
@@ -164,6 +165,8 @@ export default function App() {
     }
   }, [lang]);
 
+
+
   // ─── Local-First Initialization ──────────────────────────────────────────────────
   // On mount: preload pets into state so LoginScreen can detect returning users.
   // Always show LoginScreen first - user must tap to enter.
@@ -173,8 +176,13 @@ export default function App() {
       setIsPrivacyRoute(true);
     }
 
-    const premiumStatus = localStorage.getItem('petory_premium') === 'true';
-    setIsPremium(premiumStatus);
+    // Initialize IAP and check premium status
+    initializeIAP().then(() => {
+      checkPremiumStatus().then((isPro) => {
+        setIsPremium(isPro);
+        if (isPro) localStorage.setItem('petory_premium', 'true');
+      });
+    });
 
     getProfiles().then((profiles) => {
       if (profiles && profiles.length > 0) {
