@@ -277,41 +277,69 @@ export default function App() {
             background: '#F5F3EE',
           }}
         >
-          {!user ? (
-            <LoginScreen onLogin={(usr) => {
-              if (usr) {
-                // Load pets before showing MainShell
-                getProfiles().then((profiles) => {
-                  if (profiles && profiles.length > 0) {
-                    const loadedPets: Pet[] = profiles.map((p: any) => ({
-                      id: p.id,
-                      name: p.name || 'My Pet',
-                      breed: p.breed || '',
-                      birthdate: p.birthdate || '2024-01',
-                      photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-                      weight: parseFloat(p.weight) || 0,
-                      weightUnit: p.weightUnit || 'kg',
-                      lastVaccine: p.lastVaccine || '',
-                      nextVet: p.nextVet || ''
-                    }));
-                    setPets(loadedPets);
-                  }
-                  setPetsLoaded(true);
-                  setUser(usr);
-                }).catch(() => {
-                  setPetsLoaded(true);
-                  setUser(usr);
-                });
-              }
-            }} />
-          ) : (
-            <MainShell />
-          )}
-          {/* Modals available everywhere */}
-          <AnimatePresence>{showAudioModal && <AudioPlayerModal />}</AnimatePresence>
-          <AnimatePresence>{showPremiumModal && <PremiumModal />}</AnimatePresence>
-          <AnimatePresence>{showPetFormModal && <PetFormModal />}</AnimatePresence>
-          <AnimatePresence>{showPrivacyPolicy && <PrivacyPolicy onClose={() => setShowPrivacyPolicy(false)} />}</AnimatePresence>
+          {/* ── Global Safe Area Spacer ── */}
+          <div className="w-full shrink-0 z-0 pointer-events-none" style={{ height: 'calc(env(safe-area-inset-top, 0px) + 20px)' }} />
+
+          {/* ── Global Language Toggle ── */}
+          <div className="absolute top-[calc(env(safe-area-inset-top,0px)+12px)] right-6 z-[100]">
+            <div
+              className="flex items-center rounded-full p-1 gap-0.5 shadow-sm"
+              style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)' }}
+            >
+              {(['EN', 'KO'] as const).map(l => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className="px-3 py-1 rounded-full text-xs transition-all duration-300"
+                  style={{
+                    background: lang === l ? '#1A2426' : 'transparent',
+                    color: lang === l ? '#FFFFFF' : '#4B5563',
+                    fontWeight: lang === l ? 700 : 500,
+                  }}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 w-full h-full relative overflow-hidden flex flex-col">
+            {!user ? (
+              <LoginScreen onLogin={(usr) => {
+                if (usr) {
+                  // Load pets before showing MainShell
+                  getProfiles().then((profiles) => {
+                    if (profiles && profiles.length > 0) {
+                      const loadedPets: Pet[] = profiles.map((p: any) => ({
+                        id: p.id,
+                        name: p.name || 'My Pet',
+                        breed: p.breed || '',
+                        birthdate: p.birthdate || '2024-01',
+                        photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+                        weight: parseFloat(p.weight) || 0,
+                        weightUnit: p.weightUnit || 'kg',
+                        lastVaccine: p.lastVaccine || '',
+                        nextVet: p.nextVet || ''
+                      }));
+                      setPets(loadedPets);
+                    }
+                    setPetsLoaded(true);
+                    setUser(usr);
+                  }).catch(() => {
+                    setPetsLoaded(true);
+                    setUser(usr);
+                  });
+                }
+              }} />
+            ) : (
+              <MainShell />
+            )}
+            {/* Modals available everywhere */}
+            <AnimatePresence>{showAudioModal && <AudioPlayerModal />}</AnimatePresence>
+            <AnimatePresence>{showPremiumModal && <PremiumModal />}</AnimatePresence>
+            <AnimatePresence>{showPetFormModal && <PetFormModal />}</AnimatePresence>
+            <AnimatePresence>{showPrivacyPolicy && <PrivacyPolicy onClose={() => setShowPrivacyPolicy(false)} />}</AnimatePresence>
+          </div>
         </div>
       </div>
     </AppContext.Provider>

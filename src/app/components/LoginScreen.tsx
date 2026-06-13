@@ -10,7 +10,7 @@ const DEFAULT_PHOTO = '/default-dog.png';
 interface Props { onLogin: (user?: any) => void; }
 
 export function LoginScreen({ onLogin }: Props) {
-  const { lang, setLang, pets, setShowPrivacyPolicy } = useApp();
+  const { lang, setLang, pets, setShowPrivacyPolicy, setEditingPet, setShowPetFormModal } = useApp();
   const [dogName, setDogName] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState(DEFAULT_PHOTO);
@@ -90,16 +90,22 @@ export function LoginScreen({ onLogin }: Props) {
       }
 
       // Save the initial profile locally
-      await saveProfile({
+      const result = await saveProfile({
         name: targetName,
-        breed: KO ? '믹스견' : 'Mixed Breed',
+        breed: '',
         photo: finalPhoto,
-        birthdate: '2024-01',
+        birthdate: '',
         weight: 0,
         weightUnit: 'kg',
         lastVaccine: '',
         nextVet: ''
       });
+
+      // Show Pet Form Modal so the user can complete registration
+      if (result.success && result.profile) {
+        setEditingPet(result.profile as any);
+        setShowPetFormModal(true);
+      }
 
       // Proceed to main shell
       onLogin({ isLocal: true });
@@ -131,26 +137,7 @@ export function LoginScreen({ onLogin }: Props) {
 
       {/* ── Top Navigation ── */}
       <div className="relative z-10 flex items-center justify-between px-6 pt-6 pb-2">
-        {/* Lang toggle (Nature Glass Style) */}
-        <div
-          className="flex items-center rounded-full p-1 gap-0.5 shadow-sm"
-          style={{ background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)' }}
-        >
-          {(['EN', 'KO'] as const).map(l => (
-            <button
-              key={l}
-              onClick={() => setLang(l)}
-              className="px-3 py-1 rounded-full text-xs transition-all duration-300"
-              style={{
-                background: lang === l ? '#1A2426' : 'transparent',
-                color: lang === l ? '#FFFFFF' : '#4B5563',
-                fontWeight: lang === l ? 700 : 500,
-              }}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
+        <div className="flex-1" />
 
         {/* Playlist Button */}
         <PlaylistButton />
