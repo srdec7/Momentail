@@ -92,6 +92,7 @@ export default function App() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showPetFormModal, setShowPetFormModal] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [isPrivacyRoute, setIsPrivacyRoute] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
@@ -142,6 +143,11 @@ export default function App() {
   // On mount: preload pets into state so LoginScreen can detect returning users.
   // Always show LoginScreen first - user must tap to enter.
   useEffect(() => {
+    const path = window.location.pathname.toLowerCase();
+    if (path === '/privacy' || path === '/privacy.html') {
+      setIsPrivacyRoute(true);
+    }
+
     const premiumStatus = localStorage.getItem('petory_premium') === 'true';
     setIsPremium(premiumStatus);
 
@@ -217,6 +223,33 @@ export default function App() {
     editingPet, setEditingPet,
     audioCurrentTime, audioDuration, seekAudio,
   };
+
+  if (isPrivacyRoute) {
+    return (
+      <AppContext.Provider value={ctx}>
+        <div 
+          className="w-full min-h-screen flex justify-center"
+          style={{ 
+            backgroundColor: '#A29E91',
+            backgroundImage: 'url("/pc-bg.png")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '400px'
+          }}
+        >
+          <div
+            className="w-full max-w-[480px] h-[100dvh] overflow-hidden flex flex-col relative shadow-2xl"
+            style={{
+              background: '#F5F3EE',
+            }}
+          >
+            <PrivacyPolicy onClose={() => {
+              window.location.href = '/';
+            }} />
+          </div>
+        </div>
+      </AppContext.Provider>
+    );
+  }
 
   return (
     <AppContext.Provider value={ctx}>

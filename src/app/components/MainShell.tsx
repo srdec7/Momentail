@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Crown, ChevronDown, Plus, Check, Music, LogOut } from 'lucide-react';
+import { Crown, ChevronDown, Plus, Check, Music, LogOut, Shield } from 'lucide-react';
 import { useApp } from '../App';
 import { ProfileTab } from './ProfileTab';
 import { TimelineTab } from './TimelineTab';
@@ -42,7 +42,7 @@ export function PlaylistButton() {
 
 // ─── Pet Dropdown ─────────────────────────────────────────────────────────────
 function PetDropdown() {
-  const { pets, setPets, selectedPetIdx, setSelectedPetIdx, showProfileDropdown, setShowProfileDropdown, isPremium, setShowPremiumModal, lang, setShowPetFormModal, setEditingPet } = useApp();
+  const { pets, setPets, selectedPetIdx, setSelectedPetIdx, showProfileDropdown, setShowProfileDropdown, isPremium, setShowPremiumModal, lang, setShowPetFormModal, setEditingPet, setShowPrivacyPolicy } = useApp();
   const current = pets[selectedPetIdx];
 
   const handleAddPet = () => {
@@ -136,6 +136,24 @@ function PetDropdown() {
                 {!isPremium && pets.length >= 1 && (
                   <Crown size={10} className="ml-auto" style={{ color: '#A27B5C' }} />
                 )}
+              </button>
+            </div>
+            <div style={{ borderTop: '1px solid rgba(44,54,57,0.08)' }}>
+              <button
+                onClick={() => {
+                  setShowProfileDropdown(false);
+                  setShowPrivacyPolicy(true);
+                }}
+                className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium transition-all"
+                style={{ color: '#5C6B64' }}
+              >
+                <div
+                  className="w-6 h-6 rounded-lg flex items-center justify-center"
+                  style={{ background: 'rgba(92,107,100,0.1)' }}
+                >
+                  <Shield size={12} />
+                </div>
+                {lang === 'KO' ? '개인정보처리방침' : 'Privacy Policy'}
               </button>
             </div>
             <div style={{ borderTop: '1px solid rgba(44,54,57,0.08)' }}>
