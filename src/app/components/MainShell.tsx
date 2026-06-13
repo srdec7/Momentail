@@ -8,37 +8,6 @@ import { InsightsTab } from './InsightsTab';
 import { AudioPlayerModal } from './AudioPlayerModal';
 import { PremiumModal } from './PremiumModal';
 
-// ─── Playlist Button ────────────────────────────────────────────────────────────
-export function PlaylistButton() {
-  const { isAudioPlaying, setShowAudioModal, lang } = useApp();
-  return (
-    <motion.button
-      whileTap={{ scale: 0.93 }}
-      onClick={() => setShowAudioModal(true)}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold"
-      style={{
-        background: 'linear-gradient(135deg, #1A2426 0%, #2A3638 100%)',
-        color: '#fff',
-        boxShadow: '0 4px 15px rgba(26,36,38,0.25)',
-        cursor: 'pointer',
-      }}
-    >
-      <Music size={13} style={{ color: isAudioPlaying ? '#10B981' : '#fff' }} />
-      <span>{lang === 'KO' ? '플레이리스트' : 'Playlist'}</span>
-      {isAudioPlaying && (
-        <div className="flex items-end gap-[2px] h-[12px] ml-1">
-          {[1, 2, 3].map(i => (
-            <span
-              key={i}
-              className={`block rounded-full music-bar-${i}`}
-              style={{ width: 2, height: 12, background: '#10B981', transformOrigin: 'bottom' }}
-            />
-          ))}
-        </div>
-      )}
-    </motion.button>
-  );
-}
 
 // ─── Pet Dropdown ─────────────────────────────────────────────────────────────
 function PetDropdown() {
@@ -217,11 +186,21 @@ const NAV_ITEMS = [
     labelKO: '인사이트',
     labelEN: 'Insights',
   },
+  {
+    id: 'playlist',
+    icon: (
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" strokeWidth="1.8">
+        <path d="M9 18V5l12-2v13M9 9l12-2M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm12-2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    labelKO: '플레이리스트',
+    labelEN: 'Playlist',
+  },
 ] as const;
 
 // ─── Main Shell ───────────────────────────────────────────────────────────────
 export function MainShell() {
-  const { activeTab, setActiveTab, lang, isPremium, setShowPremiumModal, showAudioModal, showPremiumModal } = useApp();
+  const { activeTab, setActiveTab, lang, isPremium, setShowPremiumModal, showAudioModal, setShowAudioModal, isAudioPlaying } = useApp();
   const KO = lang === 'KO';
 
   const TAB_MAP = {
@@ -257,10 +236,9 @@ export function MainShell() {
           </div>
         </div>
 
-        {/* Right: Lang & Playlist */}
+        {/* Right: Lang Toggle */}
         <div className="flex flex-col items-end gap-1.5 mt-1">
           <LangToggle />
-          <PlaylistButton />
         </div>
       </div>
 
@@ -291,17 +269,36 @@ export function MainShell() {
         >
           {NAV_ITEMS.map(item => {
             const isActive = activeTab === item.id;
+            const isPlaylist = item.id === 'playlist';
+            
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id as any)}
+                onClick={() => {
+                  if (isPlaylist) {
+                    setShowAudioModal(true);
+                  } else {
+                    setActiveTab(item.id as any);
+                  }
+                }}
                 className="flex flex-col items-center gap-1 relative px-4"
               >
                 <div
-                  className="transition-all duration-300"
-                  style={{ color: isActive ? '#3E6D52' : '#8a8e8b' }}
+                  className="transition-all duration-300 relative"
+                  style={{ color: (isActive || (isPlaylist && isAudioPlaying)) ? '#3E6D52' : '#8a8e8b' }}
                 >
                   {item.icon}
+                  {isPlaylist && isAudioPlaying && (
+                    <div className="absolute -top-1 -right-2 flex items-end gap-[1px] h-[8px]">
+                      {[1, 2, 3].map(i => (
+                        <span
+                          key={i}
+                          className={`block rounded-full music-bar-${i}`}
+                          style={{ width: 1.5, height: 8, background: '#10B981', transformOrigin: 'bottom' }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <span
                   className="text-[10px] font-bold uppercase tracking-wider"
