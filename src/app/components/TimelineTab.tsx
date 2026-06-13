@@ -84,7 +84,7 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-        className="rounded-t-3xl p-5 overflow-y-auto petory-scroll flex flex-col w-full"
+        className="rounded-t-3xl p-5 overflow-y-auto petory-scroll w-full"
         style={{ background: '#FFFFFF', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >
