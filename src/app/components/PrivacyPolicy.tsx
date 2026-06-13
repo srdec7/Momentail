@@ -59,7 +59,7 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
 
             <h4 className="font-bold text-[#2C3639] mb-2 text-base">5. 문의처</h4>
             <p className="mb-4">
-              개인정보처리방침에 대한 문의는 support@momentail.com 으로 연락주시기 바랍니다.
+              개인정보처리방침에 대한 문의는 <a href="mailto:srdec7@gmail.com" className="underline font-semibold text-[#A27B5C]">srdec7@gmail.com</a> 으로 연락주시기 바랍니다.
             </p>
           </>
         ) : (
@@ -90,7 +90,7 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
 
             <h4 className="font-bold text-[#2C3639] mb-2 text-base">5. Contact Us</h4>
             <p className="mb-4">
-              If you have any questions about this Privacy Policy, please contact support@momentail.com.
+              If you have any questions about this Privacy Policy, please contact <a href="mailto:srdec7@gmail.com" className="underline font-semibold text-[#A27B5C]">srdec7@gmail.com</a>.
             </p>
           </>
         )}
