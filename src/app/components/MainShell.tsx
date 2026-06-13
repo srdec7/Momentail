@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Crown, ChevronDown, Plus, Check, Music, LogOut, Shield } from 'lucide-react';
-import { useApp } from '../App';
+import { useApp, LangToggle } from '../App';
 import { ProfileTab } from './ProfileTab';
 import { TimelineTab } from './TimelineTab';
 import { InsightsTab } from './InsightsTab';
@@ -237,9 +237,9 @@ export function MainShell() {
     >
       {/* ── Header ── */}
       <div
-        className="flex-shrink-0 flex items-center justify-between px-4"
+        className="flex-shrink-0 flex items-center justify-between px-4 relative"
         style={{
-          paddingTop: 48, // below Dynamic Island
+          paddingTop: 12,
           paddingBottom: 10,
           background: 'rgba(220,215,201,0.88)',
           backdropFilter: 'blur(20px)',
@@ -257,8 +257,11 @@ export function MainShell() {
           </div>
         </div>
 
-        {/* Right: Playlist */}
-        <PlaylistButton />
+        {/* Right: Lang & Playlist */}
+        <div className="flex flex-col items-end gap-1.5 mt-1">
+          <LangToggle />
+          <PlaylistButton />
+        </div>
       </div>
 
       {/* ── Tab Content ── */}

@@ -76,6 +76,31 @@ export const AppContext = createContext<AppContextType>(null!);
 export const useApp = () => useContext(AppContext);
 
 // ─── App Component ────────────────────────────────────────────────────────────
+export function LangToggle() {
+  const { lang, setLang } = useApp();
+  return (
+    <div
+      className="flex items-center rounded-full p-0.5 gap-0.5 shadow-sm shrink-0 pointer-events-auto"
+      style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)' }}
+    >
+      {(['EN', 'KO'] as const).map(l => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          className="px-2.5 py-1 rounded-full text-[10px] transition-all duration-300"
+          style={{
+            background: lang === l ? '#1A2426' : 'transparent',
+            color: lang === l ? '#FFFFFF' : '#4B5563',
+            fontWeight: lang === l ? 700 : 500,
+          }}
+        >
+          {l}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [petsLoaded, setPetsLoaded] = useState(false);
@@ -280,28 +305,7 @@ export default function App() {
           {/* ── Global Safe Area Spacer ── */}
           <div className="w-full shrink-0 z-0 pointer-events-none" style={{ height: 'calc(env(safe-area-inset-top, 0px) + 20px)' }} />
 
-          {/* ── Global Language Toggle ── */}
-          <div className="absolute top-[calc(env(safe-area-inset-top,0px)+12px)] right-6 z-[100]">
-            <div
-              className="flex items-center rounded-full p-1 gap-0.5 shadow-sm"
-              style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)' }}
-            >
-              {(['EN', 'KO'] as const).map(l => (
-                <button
-                  key={l}
-                  onClick={() => setLang(l)}
-                  className="px-3 py-1 rounded-full text-xs transition-all duration-300"
-                  style={{
-                    background: lang === l ? '#1A2426' : 'transparent',
-                    color: lang === l ? '#FFFFFF' : '#4B5563',
-                    fontWeight: lang === l ? 700 : 500,
-                  }}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           <div className="flex-1 w-full h-full relative overflow-hidden flex flex-col">
             {!user ? (

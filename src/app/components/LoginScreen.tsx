@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Crown, ChevronRight, Sparkles, ClipboardList, Headphones, RefreshCw, Camera, Heart } from 'lucide-react';
-import { useApp } from '../App';
+import { useApp, LangToggle } from '../App';
 import { saveProfile } from '../../lib/api';
 import { PlaylistButton } from './MainShell';
 
@@ -137,7 +137,7 @@ export function LoginScreen({ onLogin }: Props) {
 
       {/* ── Top Navigation ── */}
       <div className="relative z-10 flex items-center justify-between px-6 pt-6 pb-2">
-        <div className="flex-1" />
+        <LangToggle />
 
         {/* Playlist Button */}
         <PlaylistButton />
