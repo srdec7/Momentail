@@ -216,29 +216,30 @@ export function MainShell() {
     >
       {/* ── Header ── */}
       <div
-        className="flex-shrink-0 flex items-center justify-between px-4 relative"
+        className="flex-shrink-0 w-full relative"
         style={{
-          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-          paddingBottom: 10,
+          paddingTop: 'env(safe-area-inset-top, 0px)',
           background: 'rgba(220,215,201,0.88)',
           backdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(44,54,57,0.06)',
           zIndex: 30,
         }}
       >
-        {/* Pet selector */}
-        <PetDropdown />
+        <div className="flex items-center justify-between px-4 relative" style={{ paddingTop: 12, paddingBottom: 10 }}>
+          {/* Pet selector */}
+          <PetDropdown />
 
-        {/* Logo center */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 mt-1">
-          <div className="w-[90px] h-[90px] flex items-center justify-center overflow-hidden">
-            <img src="/logo.png" alt="Momentail Logo" className="w-full h-full object-contain" />
+          {/* Logo center */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 mt-1">
+            <div className="w-[90px] h-[90px] flex items-center justify-center overflow-hidden">
+              <img src="/logo.png" alt="Momentail Logo" className="w-full h-full object-contain" />
+            </div>
           </div>
-        </div>
 
-        {/* Right: Lang Toggle */}
-        <div className="flex flex-col items-end gap-1.5 mt-1">
-          <LangToggle />
+          {/* Right: Lang Toggle */}
+          <div className="flex flex-col items-end gap-1.5 mt-1">
+            <LangToggle />
+          </div>
         </div>
       </div>
 
