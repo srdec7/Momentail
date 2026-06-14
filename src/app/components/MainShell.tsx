@@ -218,7 +218,7 @@ export function MainShell() {
       <div
         className="flex-shrink-0 flex items-center justify-between px-4 relative"
         style={{
-          paddingTop: 12,
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
           paddingBottom: 10,
           background: 'rgba(220,215,201,0.88)',
           backdropFilter: 'blur(20px)',

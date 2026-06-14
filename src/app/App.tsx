@@ -310,8 +310,7 @@ export default function App() {
             background: '#F5F3EE',
           }}
         >
-          {/* ── Global Safe Area Spacer ── */}
-          <div className="w-full shrink-0 z-0 pointer-events-none" style={{ height: 'calc(env(safe-area-inset-top, 0px) + 20px)' }} />
+          {/* ── Global Safe Area Spacer removed to allow headers to extend ── */}
 
 
 

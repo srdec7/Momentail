@@ -135,7 +135,10 @@ export function LoginScreen({ onLogin }: Props) {
       />
 
       {/* ── Top Navigation ── */}
-      <div className="relative z-10 flex items-center justify-end px-6 pt-6 pb-2">
+      <div 
+        className="relative z-10 flex items-center justify-end px-6 pb-2"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 24px)' }}
+      >
         <LangToggle />
       </div>
       
