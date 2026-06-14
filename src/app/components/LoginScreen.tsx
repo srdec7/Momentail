@@ -160,7 +160,7 @@ export function LoginScreen({ onLogin }: Props) {
       </div>
 
       {/* ── Forest Glass Registration Card ── */}
-      <div className="mt-auto px-5 relative z-10">
+      <div className={`${isReturningUser ? 'my-auto' : 'mt-auto'} px-5 relative z-10`}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
