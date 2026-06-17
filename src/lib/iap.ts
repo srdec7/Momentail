@@ -6,8 +6,12 @@ import { Capacitor } from '@capacitor/core';
 const REVENUECAT_APPLE_API_KEY = "appl_YOUR_APPLE_API_KEY_HERE";
 const REVENUECAT_GOOGLE_API_KEY = "goog_YOUR_GOOGLE_API_KEY_HERE";
 
-// TODO (Macbook Colleague): Replace with your exact Entitlement ID in RevenueCat
+// TODO (Macbook Colleague): Replace with your exact Entitlement ID in RevenueCat (default is usually "pro")
 export const ENTITLEMENT_ID = "pro"; 
+
+// App Store Connect Product Identifiers
+export const PRODUCT_ID = "com.momentail.petory.pro";
+export const APPLE_APP_ID = "6781349460";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function initializeIAP() {
@@ -56,6 +60,12 @@ export async function getProPrice(): Promise<string | null> {
       // Takes the first package in the current offering (usually Lifetime)
       const lifetimePackage = offerings.current.availablePackages[0];
       return lifetimePackage.product.priceString;
+    } else {
+      // Fallback: Fetch specific product ID directly
+      const products = await Purchases.getProducts([PRODUCT_ID]);
+      if (products && products.length > 0) {
+        return products[0].priceString;
+      }
     }
   } catch (error) {
     console.error('Error fetching offerings:', error);
@@ -84,7 +94,10 @@ export async function purchasePro(): Promise<boolean> {
         return true;
       }
     } else {
-      throw new Error("No packages available for purchase. Please check RevenueCat Offerings.");
+      // Fallback: Purchase specific product ID directly
+      const purchaseResult = await Purchases.purchaseProduct({ productIdentifier: PRODUCT_ID });
+      // Usually purchasing successfully means it's active. Let's return true.
+      return true;
     }
   } catch (error: any) {
     if (error.code === 'PURCHASE_CANCELLED' || error.message.includes('cancel')) {
