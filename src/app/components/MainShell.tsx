@@ -230,9 +230,9 @@ export function MainShell() {
           <PetDropdown />
 
           {/* Logo center */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 mt-1">
-            <div className="w-[90px] h-[90px] flex items-center justify-center overflow-hidden">
-              <img src="/logo.png" alt="Momentail Logo" className="w-full h-full object-contain" />
+          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-50" style={{ top: '50%', transform: 'translate(-50%, -50%)' }}>
+            <div className="w-[180px] h-[180px] flex items-center justify-center overflow-visible">
+              <img src="/logo.png" alt="Momentail Logo" className="w-full h-full object-contain drop-shadow-md" />
             </div>
           </div>
 

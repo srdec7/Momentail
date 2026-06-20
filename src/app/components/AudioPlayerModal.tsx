@@ -133,19 +133,16 @@ export function AudioPlayerModal() {
   const catTracks = TRACKS.filter(t => t.category === selectedCat);
 
   const handleTrackClick = (t: Track) => {
-    if (requireLogin()) return;
     setCurrentTrackIdx(TRACKS.indexOf(t));
     setIsAudioPlaying(true);
   };
 
   const handlePrev = () => {
-    if (requireLogin()) return;
     const prevIdx = (currentTrackIdx - 1 + TRACKS.length) % TRACKS.length;
     setCurrentTrackIdx(prevIdx);
   };
 
   const handleNext = () => {
-    if (requireLogin()) return;
     const nextIdx = (currentTrackIdx + 1) % TRACKS.length;
     setCurrentTrackIdx(nextIdx);
   };
