@@ -4,7 +4,6 @@ import { MainShell } from './components/MainShell';
 import { getProfiles, getTimeline } from '../lib/api';
 import { initializeIAP, checkPremiumStatus } from '../lib/iap';
 import { TRACKS, AudioPlayerModal } from './components/AudioPlayerModal';
-import { PremiumModal } from './components/PremiumModal';
 import { PetFormModal } from './components/PetFormModal';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { AnimatePresence } from 'motion/react';
@@ -58,8 +57,6 @@ export interface AppContextType {
   setCurrentTrackIdx: (i: number) => void;
   showAudioModal: boolean;
   setShowAudioModal: (v: boolean) => void;
-  showPremiumModal: boolean;
-  setShowPremiumModal: (v: boolean) => void;
   showProfileDropdown: boolean;
   setShowProfileDropdown: (v: boolean) => void;
   showPetFormModal: boolean;
@@ -114,7 +111,6 @@ export default function App() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [currentTrackIdx, setCurrentTrackIdx] = useState(0);
   const [showAudioModal, setShowAudioModal] = useState(false);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showPetFormModal, setShowPetFormModal] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -249,7 +245,6 @@ export default function App() {
     isAudioPlaying, setIsAudioPlaying,
     currentTrackIdx, setCurrentTrackIdx,
     showAudioModal, setShowAudioModal,
-    showPremiumModal, setShowPremiumModal,
     showProfileDropdown, setShowProfileDropdown,
     showPetFormModal, setShowPetFormModal,
     showPrivacyPolicy, setShowPrivacyPolicy,
@@ -347,7 +342,6 @@ export default function App() {
             )}
             {/* Modals available everywhere */}
             <AnimatePresence>{showAudioModal && <AudioPlayerModal />}</AnimatePresence>
-            <AnimatePresence>{showPremiumModal && <PremiumModal />}</AnimatePresence>
             <AnimatePresence>{showPetFormModal && <PetFormModal />}</AnimatePresence>
             <AnimatePresence>{showPrivacyPolicy && <PrivacyPolicy onClose={() => setShowPrivacyPolicy(false)} />}</AnimatePresence>
           </div>

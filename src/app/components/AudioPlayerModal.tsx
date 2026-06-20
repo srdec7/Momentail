@@ -110,7 +110,7 @@ function LpDisc({ playing, color }: { playing: boolean; color: string }) {
 
 // ─── Audio Player Modal ────────────────────────────────────────────────────────
 export function AudioPlayerModal() {
-  const { lang, isAudioPlaying, setIsAudioPlaying, currentTrackIdx, setCurrentTrackIdx, setShowAudioModal, isPremium, setShowPremiumModal, audioCurrentTime, audioDuration, seekAudio } = useApp();
+  const { lang, isAudioPlaying, setIsAudioPlaying, currentTrackIdx, setCurrentTrackIdx, setShowAudioModal, audioCurrentTime, audioDuration, seekAudio } = useApp();
   const KO = lang === 'KO';
   const [selectedCat, setSelectedCat] = useState<CatId>('sleep');
 

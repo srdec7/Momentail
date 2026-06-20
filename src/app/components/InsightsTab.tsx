@@ -261,7 +261,7 @@ function DogEngineLoader({ lang }: { lang: 'KO' | 'EN' }) {
 
 // ─── Insights Tab ─────────────────────────────────────────────────────────────
 export function InsightsTab() {
-  const { lang, pets, selectedPetIdx, timeline, isPremium, setShowPremiumModal } = useApp();
+  const { lang, pets, selectedPetIdx, timeline, isPremium } = useApp();
   const KO = lang === 'KO';
   const pet = pets[selectedPetIdx] || pets[0];
   const ageMonths = useMemo(() => calcAgeMonths(pet?.birthdate || '2024-01'), [pet]);
@@ -464,9 +464,9 @@ export function InsightsTab() {
                   {KO 
                     ? '본 AI 인사이트는 정보 제공 목적으로만 사용되며 전문 수의사의 진단, 처방, 또는 치료를 대신할 수 없습니다. 생성된 제안은 반려동물 건강 관리의 일반적인 가이드라인(예: '
                     : 'This AI insight is for informational purposes only and is not a substitute for professional veterinary diagnosis, prescription, or treatment. The generated suggestions are based on general pet care guidelines (e.g., '}
-                  <a href="https://www.avma.org" target="_blank" rel="noreferrer" className="underline font-semibold text-[#A27B5C]">AVMA</a>
+                  <a href="https://www.avma.org/resources-tools/pet-owners" target="_blank" rel="noreferrer" className="underline font-semibold text-[#A27B5C]">AVMA</a>
                   {KO ? ', ' : ', '}
-                  <a href="https://www.akc.org" target="_blank" rel="noreferrer" className="underline font-semibold text-[#A27B5C]">AKC</a>
+                  <a href="https://www.akc.org/expert-advice/health/" target="_blank" rel="noreferrer" className="underline font-semibold text-[#A27B5C]">AKC</a>
                   {KO ? ')을 바탕으로 합니다. 이상 징후가 있을 시 반드시 동물병원에 방문하시기 바랍니다.' : '). If you notice any abnormal signs, please consult a qualified veterinarian immediately.'}
                 </p>
               </div>
