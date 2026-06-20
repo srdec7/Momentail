@@ -35,7 +35,7 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
           <>
             <h4 className="font-bold text-[#2C3639] mb-2 text-base">1. 수집하는 개인정보의 항목</h4>
             <p className="mb-4">
-              Petory(이하 "앱")는 원활한 서비스 제공을 위해 아래와 같은 정보를 수집합니다.<br/>
+              Momentail(이하 "앱")은 원활한 서비스 제공을 위해 아래와 같은 정보를 수집합니다.<br/>
               - 필수항목: 반려견 이름, 품종, 생년월일, 성별, 체중, 예방접종 기록, 식사/수면/산책 기록<br/>
               - 선택항목: 반려견 사진 (로컬 기기에 저장)
             </p>
@@ -66,7 +66,7 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
           <>
             <h4 className="font-bold text-[#2C3639] mb-2 text-base">1. Information We Collect</h4>
             <p className="mb-4">
-              Petory (the "App") collects the following information to provide a seamless service:<br/>
+              Momentail (the "App") collects the following information to provide a seamless service:<br/>
               - Required: Pet name, breed, birthdate, weight, vaccination records, and activity logs (meal, sleep, walk).<br/>
               - Optional: Pet photos (stored locally).
             </p>
