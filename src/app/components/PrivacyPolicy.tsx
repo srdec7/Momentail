@@ -18,7 +18,7 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
       <div className="flex items-center justify-between px-5 py-4 border-b border-[#2C3639]/10 bg-white">
         <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: '#2C3639' }}>
           <Shield size={20} color="#A27B5C" />
-          {KO ? '개인정보처리방침' : 'Privacy Policy'}
+          {KO ? '개인정보처리방침 및 면책조항' : 'Privacy Policy & Disclaimer'}
         </h3>
         <button
           onClick={onClose}
@@ -52,9 +52,9 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
               사용자가 오프라인 모드(로컬 기기)를 사용하는 경우, 모든 정보는 사용자의 기기에만 저장되며 서버로 전송되지 않습니다. 앱 삭제 시 로컬 데이터는 자동 파기됩니다.
             </p>
 
-            <h4 className="font-bold text-[#2C3639] mb-2 text-base">4. 인앱결제 관련</h4>
+            <h4 className="font-bold text-[#2C3639] mb-2 text-base">4. 의학적 책임 한계 (면책조항)</h4>
             <p className="mb-4">
-              프리미엄 팩 결제는 Apple App Store 또는 Google Play Store의 네이티브 인앱결제 시스템을 통하여 안전하게 처리되며, 앱 자체에서 금융 정보를 수집하거나 저장하지 않습니다.
+              본 앱이 제공하는 AI 인사이트 및 건강 관련 정보는 반려동물 건강 관리를 위한 일반적인 참고용이며, 전문 수의사의 진단이나 치료를 대신할 수 없습니다. 이상 징후가 있을 시 반드시 동물병원에 방문하시기 바랍니다.
             </p>
 
             <h4 className="font-bold text-[#2C3639] mb-2 text-base">5. 문의처</h4>
@@ -83,14 +83,14 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
               If using offline mode, all data is stored exclusively on your device. Deleting the App will permanently remove this local data.
             </p>
 
-            <h4 className="font-bold text-[#2C3639] mb-2 text-base">4. In-App Purchases</h4>
+            <h4 className="font-bold text-[#2C3639] mb-2 text-base">4. Medical Disclaimer</h4>
             <p className="mb-4">
-              Premium Pack purchases are securely processed through the Apple App Store or Google Play Store native billing systems. We do not collect or store your financial information.
+              The AI insights and health information provided by this App are for general informational purposes only and are not a substitute for professional veterinary diagnosis or treatment. Always consult a qualified veterinarian if you have concerns about your pet's health.
             </p>
 
             <h4 className="font-bold text-[#2C3639] mb-2 text-base">5. Contact Us</h4>
             <p className="mb-4">
-              If you have any questions about this Privacy Policy, please contact <a href="mailto:srdec7@gmail.com" className="underline font-semibold text-[#A27B5C]">srdec7@gmail.com</a>.
+              If you have any questions about this policy, please contact <a href="mailto:srdec7@gmail.com" className="underline font-semibold text-[#A27B5C]">srdec7@gmail.com</a>.
             </p>
           </>
         )}
