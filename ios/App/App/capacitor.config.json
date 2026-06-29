@@ -3,7 +3,6 @@
 	"appName": "Momentail",
 	"webDir": "dist",
 	"packageClassList": [
-		"AdMobPlugin",
 		"PurchasesPlugin"
 	]
 }
