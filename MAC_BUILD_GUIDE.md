@@ -1,111 +1,147 @@
-# macOS Build & Release Guide (Capacitor iOS)
+# Comprehensive Build Guide for Mac (App Store & Play Store)
 
-This guide provides step-by-step instructions for macOS users to build, run, and upload the **Momentail** iOS application to the App Store.
-
----
-
-## 1. Prerequisites
-
-Before starting, ensure your macOS machine has the following tools installed:
-
-1. **Node.js & npm**: Install via [Node.js Official Website](https://nodejs.org/) or using Homebrew (`brew install node`).
-2. **Xcode**: Download and install the latest version from the macOS App Store.
-3. **CocoaPods**: Required for managing iOS native dependencies. Install via Terminal:
-   ```bash
-   sudo gem install cocoapods
-   # Or on Apple Silicon (M1/M2/M3) Macs if you use Homebrew:
-   brew install cocoapods
-   ```
+This guide provides step-by-step instructions for taking the source code of **Momentail** from GitHub and building it on your Mac, resolving common environment issues, and successfully deploying it to the Apple App Store or Google Play Store.
 
 ---
 
-## 2. Setting Up the Local Repository
+## 1. Prerequisites (Mac Setup)
 
-1. Open your Terminal application.
-2. Clone or navigate to the project directory:
-   ```bash
-   cd /path/to/your/workspace/Petory_V2
-   ```
-3. Pull the latest updates from GitHub (make sure you are on the `main` branch):
-   ```bash
-   git checkout main
-   git pull origin main
-   ```
-4. Install the required Node.js packages:
-   ```bash
-   npm install --legacy-peer-deps
-   ```
+Before you begin, ensure your Mac has the following software installed:
+
+### 1.1 Node.js & npm
+You need Node.js to install JavaScript dependencies.
+- **Download**: Install from [Node.js Official Website](https://nodejs.org/) (Use the LTS version).
+- **Verify**: Open Terminal and run:
+  ```bash
+  node -v
+  npm -v
+  ```
+
+### 1.2 Xcode (For iOS)
+- **Download**: Install Xcode from the Mac App Store.
+- **Command Line Tools**: Open Terminal and run:
+  ```bash
+  xcode-select --install
+  ```
+- **CocoaPods**: Required for managing iOS native dependencies.
+  ```bash
+  sudo gem install cocoapods
+  ```
+
+### 1.3 Android Studio (For Android)
+- **Download**: Install from [Android Studio Official Website](https://developer.android.com/studio).
+- **Setup**: Open Android Studio, go to SDK Manager, and ensure you have the latest Android SDK Platform and Build Tools installed.
 
 ---
 
-## 3. Build & Sync Pipeline (Crucial)
+## 2. Cloning and Installing the Project
 
-To update the native iOS project with the latest React web frontend changes, you **must** follow this command sequence:
+### 2.1 Clone the Repository
+Open Terminal and clone your project:
+```bash
+git clone https://github.com/srdec7/Momentail.git
+cd Momentail
+```
 
-### Step 1: Compile the Web Build
-This command generates the static files in the `dist/` folder.
+### 2.2 Install Dependencies
+Install all Node.js dependencies. We use `--legacy-peer-deps` to avoid version conflicts with React 18 in some Capacitor plugins.
+```bash
+npm install --legacy-peer-deps
+```
+
+---
+
+## 3. Important: API Keys & Credentials Setup
+
+Before building, you **MUST** insert your real API keys. Currently, they are set to placeholders.
+
+### 3.1 Google AdMob App ID
+You must replace the placeholder `ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX` with your actual AdMob App IDs from your AdMob Dashboard.
+
+- **iOS**: Open `ios/App/App/Info.plist`
+  Find the `<key>GADApplicationIdentifier</key>` and replace the `<string>` below it with your **iOS AdMob App ID**.
+- **Android**: Open `android/app/src/main/AndroidManifest.xml`
+  Find `<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="..." />` and replace the value with your **Android AdMob App ID**.
+
+### 3.2 RevenueCat Public API Keys
+You need your RevenueCat Public API keys for in-app purchases to work.
+- Open `src/lib/iap.ts`.
+- Ensure `Purchases.configure({ apiKey: "YOUR_REVENUECAT_PUBLIC_KEY" });` is using your actual Apple or Google RevenueCat API keys for the respective platforms.
+
+---
+
+## 4. Building the Web App & Syncing Native Code
+
+Every time you change the JavaScript/TypeScript code, you must build it and sync it to the native folders.
+
+### 4.1 Build the Web Assets
 ```bash
 npm run build
 ```
+This command compiles your React/Vite code into the `dist/` folder.
 
-### Step 2: Sync with iOS Native Platform
-This command copies the compiled web files from `dist/` into the iOS native project folder and updates any Capacitor native plugins (like AdMob and RevenueCat).
+### 4.2 Sync with iOS and Android
+Sync the `dist/` folder and any new plugins into your native projects:
 ```bash
-npx cap sync ios
+npx cap sync
 ```
+*(If you only want to sync one platform, you can run `npx cap sync ios` or `npx cap sync android`)*
 
 ---
 
-## 4. Building & Running in Xcode
+## 5. Building and Releasing for iOS (App Store)
 
-### Step 1: Open the Project in Xcode
-Launch Xcode automatically pointing to your iOS project:
+### 5.1 Open Xcode
+Open the iOS project in Xcode directly from the terminal:
 ```bash
 npx cap open ios
 ```
 
-### Step 2: Configure Signing & Team
-Without proper signing, you cannot test on a physical device or publish to the App Store:
-1. In the left navigator panel of Xcode, select the **App** project (root node).
-2. Select **App** under the "Targets" list in the middle panel.
+### 5.2 Configure Signing & Capabilities
+1. In Xcode, click on **App** in the left project navigator.
+2. Select the **App** target in the middle pane.
 3. Go to the **Signing & Capabilities** tab.
-4. Check **Automatically manage signing**.
-5. Select your Apple Developer Account under **Team**.
-6. Verify that the **Bundle Identifier** matches your App Store Connect registration (e.g., `com.srdec7.momentail` or similar).
+4. Check **"Automatically manage signing"**.
+5. Select your Apple Developer Account from the **Team** dropdown.
+6. Ensure your **Bundle Identifier** matches exactly what is registered in App Store Connect and RevenueCat.
 
-### Step 3: Verify monetization configurations in `Info.plist`
-Open `App/App/Info.plist` in Xcode or check it in the navigator. Ensure the following keys exist (already added in the code):
-*   **AdMob Application Identifier** (`GADApplicationIdentifier`): Ensure the ID matches your production iOS AdMob App ID.
-*   **Privacy - Photo Library & Camera Usage Descriptions** (Needed for pet profile image selection).
+### 5.3 Clean and Build
+If you ever face weird errors, always clean the build folder first:
+- In the top menu bar, click **Product** > **Clean Build Folder** (`Shift + Cmd + K`).
+- Then, select your target device (e.g., Any iOS Device) and click **Product** > **Archive** to build the app for submission.
 
-### Step 4: Run the App
-*   **To Run on Simulator/Device**: Select your target device (e.g., iPhone Simulator or connected physical iPhone) from the top device dropdown and press **Cmd + R** (or click the Play button).
-*   **Clean Build Cache**: If you face build issues or dependencies are not linking correctly, clean Xcode's cache using **Shift + Cmd + K** and try running again.
-
----
-
-## 5. Monetization Testing Checklist (Sandbox Environment)
-
-### AdMob Testing
-- While developing or running on simulators/test devices, the codebase is configured to run with `isTesting: true` to avoid account suspension. You should see "Test Ad" banners and mock overlays.
-- **For Production Release**: Change `isTesting: true` to `false` in `src/lib/admob.ts` inside `showBannerAd` and `showInterstitialAd` before making the final archive.
-
-### In-App Purchases (RevenueCat) Testing
-1. Create a **Sandbox Tester** account in [App Store Connect](https://appstoreconnect.apple.com/) (under *Users and Access -> Sandbox -> Testers*).
-2. On your physical iPhone, go to **Settings -> App Store**.
-3. Scroll down to **Sandbox Account** and log in with your sandbox tester credentials.
-4. Open the Momentail App on your phone and tap **Pro Upgrade** to perform a test purchase. It will process using Apple's Sandbox environment (no real money will be charged).
+### 5.4 Submit to App Store Connect
+Once the Archive process is complete, the **Organizer** window will pop up. Click **Distribute App** and follow the prompts to upload it to App Store Connect.
 
 ---
 
-## 6. Archiving & Publishing to App Store
+## 6. Building and Releasing for Android (Google Play Store)
 
-When you are ready to upload the update to App Store Connect:
+### 6.1 Open Android Studio
+Open the Android project:
+```bash
+npx cap open android
+```
 
-1. Select **Any iOS Device (arm64)** from the Xcode device target dropdown list.
-2. In the top Xcode menu, go to **Product -> Archive**.
-3. Once the archiving process completes, the **Organizer** window will open.
-4. Click **Distribute App** on the right side.
-5. Choose **App Store Connect** and follow the prompts (Destination: *Upload*, keep default options selected).
-6. Xcode will sign, package, and upload the build to App Store Connect.
-7. Go to App Store Connect website, wait for the build to process, select it for your update version, and submit for review.
+### 6.2 Gradle Sync
+Wait for Android Studio to automatically sync the Gradle files. If it doesn't, click the "Sync Project with Gradle Files" button (an elephant icon with a blue arrow).
+
+### 6.3 Generate Signed Bundle (AAB)
+1. In the top menu bar, click **Build** > **Generate Signed Bundle / APK...**
+2. Select **Android App Bundle** (required for Google Play) and click Next.
+3. Provide your Keystore path, Keystore password, Key alias, and Key password. (If you don't have one, click "Create new...").
+4. Select the **release** build variant and click Finish.
+
+### 6.4 Upload to Google Play Console
+Locate the generated `.aab` file (usually inside `android/app/release/`) and upload it to the Google Play Console under your release track.
+
+---
+
+## Troubleshooting Common Mac Build Errors
+
+- **Pod install failed** or **CocoaPods not found**: 
+  Ensure CocoaPods is installed (`sudo gem install cocoapods`). If you are on an Apple Silicon Mac (M1/M2/M3), you might need to install via Homebrew: `brew install cocoapods`.
+- **Product not loaded (RevenueCat)**: 
+  Ensure you are testing on a real device with a Sandbox Apple ID. RevenueCat will not work properly on an iOS Simulator.
+- **Ads not showing**: 
+  Make sure you replaced the placeholder AdMob App IDs and that you have a valid internet connection. If testing locally, ensure test ads are enabled in the AdMob configuration within `capacitor.config.ts` or `src/lib/admob.ts`.
