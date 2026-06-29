@@ -53,5 +53,7 @@
 	<string>We need access to your photo library to select a profile picture for your pet.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need access to your photo library to save photos.</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX</string>
 </dict>
 </plist>
