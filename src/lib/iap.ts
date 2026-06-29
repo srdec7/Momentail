@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 
 // ─── REVENUECAT CONFIGURATION ────────────────────────────────────────────────
 // TODO (Macbook Colleague): Replace these with your actual RevenueCat API keys
-const REVENUECAT_APPLE_API_KEY = "appl_YOUR_APPLE_API_KEY_HERE";
+const REVENUECAT_APPLE_API_KEY = "appl_SpbHTttYprfikGKMPUOATowPVdD";
 const REVENUECAT_GOOGLE_API_KEY = "goog_YOUR_GOOGLE_API_KEY_HERE";
 
 // TODO (Macbook Colleague): Replace with your exact Entitlement ID in RevenueCat (default is usually "pro")

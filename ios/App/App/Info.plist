@@ -54,7 +54,7 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need access to your photo library to save photos.</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX</string>
+	<string>ca-app-pub-5036571902202474~7097547929</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This app requires tracking permission to deliver personalized advertisements that help keep the app free.</string>
 	<key>SKAdNetworkItems</key>
