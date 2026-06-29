@@ -1,24 +1,25 @@
 import { Capacitor } from '@capacitor/core';
 
 // ─── AdMob Unit IDs ──────────────────────────────────────────────────────────
-// NOTE: @capacitor-community/admob v6 conflicts with RevenueCat on Capacitor 8
-// (SPM capacitor-swift-pm version mismatch). Native AdMob is disabled for now.
-// The app uses Mock ads on all platforms until a Capacitor-8-compatible AdMob
-// plugin becomes available. Real ad revenue is pending this upstream fix.
+// Replace bannerId/interstitialId with your real AdMob ad unit IDs from
+// https://admob.google.com → Apps → Ad Units
 export const ADMOB_CONFIG = {
   ios: {
     appId:          'ca-app-pub-5036571902202474~7097547929',
-    bannerId:       'ca-app-pub-3940256099942544/2934735716',
-    interstitialId: 'ca-app-pub-3940256099942544/4411468910',
+    bannerId:       'ca-app-pub-3940256099942544/2934735716',  // ← Google test ID, replace with real
+    interstitialId: 'ca-app-pub-3940256099942544/4411468910', // ← Google test ID, replace with real
   },
   android: {
     appId:          'ca-app-pub-5036571902202474~7097547929',
-    bannerId:       'ca-app-pub-3940256099942544/6300978111',
-    interstitialId: 'ca-app-pub-3940256099942544/1033173712',
+    bannerId:       'ca-app-pub-3940256099942544/6300978111',  // ← Google test ID, replace with real
+    interstitialId: 'ca-app-pub-3940256099942544/1033173712', // ← Google test ID, replace with real
   },
 };
 
-// ─── Mock Banner State ────────────────────────────────────────────────────────
+// ─── Platform Detection ───────────────────────────────────────────────────────
+const isNative = () => Capacitor.getPlatform() !== 'web';
+
+// ─── Mock Banner State (web fallback) ────────────────────────────────────────
 let _mockBannerVisible = false;
 const _bannerListeners: ((visible: boolean) => void)[] = [];
 
@@ -36,7 +37,7 @@ function setMockBannerVisible(v: boolean) {
   _bannerListeners.forEach(cb => cb(v));
 }
 
-// ─── Mock Interstitial State ──────────────────────────────────────────────────
+// ─── Mock Interstitial State (web fallback) ───────────────────────────────────
 const _interstitialListeners: ((show: boolean) => void)[] = [];
 
 export function onInterstitialRequest(cb: (show: boolean) => void) {
@@ -51,41 +52,117 @@ function triggerMockInterstitial(show: boolean) {
   _interstitialListeners.forEach(cb => cb(show));
 }
 
+// ─── Lazy AdMob plugin loader (native only) ───────────────────────────────────
+let _adMob: any = null;
+async function getAdMob() {
+  if (!isNative()) return null;
+  if (!_adMob) {
+    try {
+      const mod = await import('@capacitor-community/admob');
+      _adMob = mod.AdMob;
+    } catch {
+      console.warn('[AdMob] Native plugin not available');
+    }
+  }
+  return _adMob;
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-/** Initialize AdMob — no-op until native plugin supports Capacitor 8. */
+/** Initialize AdMob — call once on app start. */
 export async function initializeAdMob() {
-  const platform = Capacitor.getPlatform();
-  console.log(`[AdMob] Platform: ${platform}. Native AdMob pending Capacitor-8-compatible plugin.`);
+  const plugin = await getAdMob();
+  if (!plugin) {
+    console.log('[AdMob] Web mode: using mock ads');
+    return;
+  }
+  try {
+    await plugin.initialize({ requestTrackingAuthorization: true });
+    console.log('[AdMob] Initialized successfully');
+  } catch (e) {
+    console.error('[AdMob] Init error', e);
+  }
 }
 
-/** Show banner ad (mock on all platforms for now). */
+/** Show banner ad at bottom of screen. */
 export async function showBannerAd() {
-  setMockBannerVisible(true);
-}
+  const platform = Capacitor.getPlatform();
 
-/** Hide banner ad. */
-export async function hideBannerAd() {
-  setMockBannerVisible(false);
-}
+  if (platform === 'web') {
+    setMockBannerVisible(true);
+    return;
+  }
 
-/** Show interstitial ad (mock overlay). */
-export async function showInterstitialAd(): Promise<void> {
-  return new Promise(resolve => {
-    triggerMockInterstitial(true);
-    const timer = setTimeout(() => {
-      triggerMockInterstitial(false);
-      resolve();
-    }, 4000);
+  const plugin = await getAdMob();
+  if (!plugin) return;
 
-    const cleanup = onInterstitialRequest(show => {
-      if (!show) {
-        clearTimeout(timer);
-        cleanup();
-        resolve();
-      }
+  try {
+    const { BannerAdSize, BannerAdPosition } = await import('@capacitor-community/admob');
+    const unitId = platform === 'ios'
+      ? ADMOB_CONFIG.ios.bannerId
+      : ADMOB_CONFIG.android.bannerId;
+
+    await plugin.showBanner({
+      adId: unitId,
+      adSize: BannerAdSize.ADAPTIVE_BANNER,
+      position: BannerAdPosition.BOTTOM_CENTER,
+      margin: 0,
+      isTesting: false, // ← set to true during development
     });
-  });
+  } catch (e) {
+    console.error('[AdMob] showBanner error', e);
+  }
+}
+
+/** Hide (remove) banner ad — call after premium purchase. */
+export async function hideBannerAd() {
+  const platform = Capacitor.getPlatform();
+
+  if (platform === 'web') {
+    setMockBannerVisible(false);
+    return;
+  }
+
+  const plugin = await getAdMob();
+  if (!plugin) return;
+
+  try {
+    await plugin.removeBanner();
+  } catch (e) {
+    console.error('[AdMob] hideBanner error', e)
+  }
+}
+
+/** Show interstitial ad — call on key user actions for non-premium users. */
+export async function showInterstitialAd(): Promise<void> {
+  const platform = Capacitor.getPlatform();
+
+  if (platform === 'web') {
+    return new Promise(resolve => {
+      triggerMockInterstitial(true);
+      const timer = setTimeout(() => {
+        triggerMockInterstitial(false);
+        resolve();
+      }, 4000);
+      const cleanup = onInterstitialRequest(show => {
+        if (!show) { clearTimeout(timer); cleanup(); resolve(); }
+      });
+    });
+  }
+
+  const plugin = await getAdMob();
+  if (!plugin) return;
+
+  try {
+    const unitId = platform === 'ios'
+      ? ADMOB_CONFIG.ios.interstitialId
+      : ADMOB_CONFIG.android.interstitialId;
+
+    await plugin.prepareInterstitial({ adId: unitId, isTesting: false });
+    await plugin.showInterstitial();
+  } catch (e) {
+    console.error('[AdMob] showInterstitial error', e);
+  }
 }
 
 /** Manually dismiss the mock interstitial (called by the overlay component). */
