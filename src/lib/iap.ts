@@ -10,7 +10,7 @@ const REVENUECAT_GOOGLE_API_KEY = "goog_YOUR_GOOGLE_API_KEY_HERE";
 export const ENTITLEMENT_ID = "pro"; 
 
 // App Store Connect Product Identifiers
-export const PRODUCT_ID = "com.momentail.petory.pro";
+export const PRODUCT_ID = "com.momentail.petory.premium";
 export const APPLE_APP_ID = "6781349460";
 // ─────────────────────────────────────────────────────────────────────────────
 
