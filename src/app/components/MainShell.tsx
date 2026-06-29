@@ -233,23 +233,9 @@ export function MainShell() {
             </div>
           </div>
 
-          {/* Right: Lang Toggle + Crown */}
+          {/* Right: Lang Toggle */}
           <div className="flex flex-col items-end gap-1.5 mt-1">
             <LangToggle />
-            {!isPremium && (
-              <button
-                onClick={() => setShowPremiumModal(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
-                style={{
-                  background: 'linear-gradient(135deg, #FCD34D, #F59E0B)',
-                  color: '#78350F',
-                  boxShadow: '0 2px 8px rgba(245,158,11,0.3)',
-                }}
-              >
-                <Crown size={10} />
-                PRO
-              </button>
-            )}
           </div>
         </div>
       </div>

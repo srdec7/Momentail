@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Sparkles, CheckCircle2, Infinity, Music, Star, Loader2, Crown } from 'lucide-react';
+import { X, Sparkles, CheckCircle2, Infinity, Music, Star, Loader2 } from 'lucide-react';
 import { useApp } from '../App';
 import { purchasePro, restorePurchases, getProPrice } from '../../lib/iap';
 
@@ -122,20 +122,16 @@ export function PremiumModal() {
             style={{ background: 'radial-gradient(circle, rgba(244,196,48,0.15) 0%, rgba(62,109,82,0.1) 100%)', zIndex: 0 }}
           />
           
-          <div className="relative z-10">
-            <motion.div
-              animate={{ y: [-4, 4, -4] }}
-              transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-              className="inline-flex items-center justify-center w-20 h-20 rounded-[24px] mb-5"
-              style={{
-                background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)',
-                boxShadow: '0 12px 30px rgba(245,158,11,0.3), inset 0 2px 4px rgba(255,255,255,0.5)',
+          <div className="relative z-10 pt-4">
+            <h2 
+              className="text-3xl font-black mb-3 tracking-tight" 
+              style={{ 
+                background: 'linear-gradient(135deg, #FFF 30%, #FCD34D 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 4px 20px rgba(252,211,77,0.15)'
               }}
             >
-              <Crown size={40} style={{ color: '#78350F' }} />
-            </motion.div>
-
-            <h2 className="text-2xl font-black mb-2 tracking-tight" style={{ color: '#fff' }}>
               {KO ? '가디언 패밀리팩' : 'Guardian Family Pack'}
             </h2>
             <p className="text-[14px] font-medium leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
