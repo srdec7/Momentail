@@ -6,13 +6,13 @@ import { Capacitor } from '@capacitor/core';
 export const ADMOB_CONFIG = {
   ios: {
     appId:          'ca-app-pub-5036571902202474~7097547929',
-    bannerId:       'ca-app-pub-3940256099942544/2934735716',  // ← Google test ID, replace with real
-    interstitialId: 'ca-app-pub-3940256099942544/4411468910', // ← Google test ID, replace with real
+    bannerId:       'ca-app-pub-5036571902202474/3373503875',
+    interstitialId: 'ca-app-pub-5036571902202474/3546149876',
   },
   android: {
     appId:          'ca-app-pub-5036571902202474~7097547929',
-    bannerId:       'ca-app-pub-3940256099942544/6300978111',  // ← Google test ID, replace with real
-    interstitialId: 'ca-app-pub-3940256099942544/1033173712', // ← Google test ID, replace with real
+    bannerId:       'ca-app-pub-5036571902202474/3373503875',
+    interstitialId: 'ca-app-pub-5036571902202474/3546149876',
   },
 };
 
