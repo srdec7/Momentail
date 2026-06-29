@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, Component, ErrorInfo, ReactNode, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer } from 'lucide-react';
+import { Heart, Activity as ActivityIcon, Moon, Utensils, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, Zap, RefreshCw, Printer, Lock } from 'lucide-react';
 import { useApp, ActivityType } from '../App';
 import * as htmlToImage from 'html-to-image';
 import { jsPDF } from 'jspdf';
+import { showInterstitialAd } from '../../lib/admob';
 
 // ─── Error Boundary ────────────────────────────────────────────────────────────
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; errorMsg: string }> {
@@ -261,7 +262,7 @@ function DogEngineLoader({ lang }: { lang: 'KO' | 'EN' }) {
 
 // ─── Insights Tab ─────────────────────────────────────────────────────────────
 export function InsightsTab() {
-  const { lang, pets, selectedPetIdx, timeline, isPremium } = useApp();
+  const { lang, pets, selectedPetIdx, timeline, isPremium, setShowPremiumModal } = useApp();
   const KO = lang === 'KO';
   const pet = pets[selectedPetIdx] || pets[0];
   const ageMonths = useMemo(() => calcAgeMonths(pet?.birthdate || '2024-01'), [pet]);
@@ -283,7 +284,7 @@ export function InsightsTab() {
     setIsLoading(true);
     setResult(null);
     setErrorMsg(null);
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
         const res = runDogEngine(
           pet.name,
@@ -301,6 +302,10 @@ export function InsightsTab() {
         setErrorMsg(err.message || String(err));
       } finally {
         setIsLoading(false);
+        // Show interstitial for non-premium users
+        if (!isPremium) {
+          await showInterstitialAd();
+        }
       }
     }, 1600);
   };
@@ -450,8 +455,26 @@ export function InsightsTab() {
 
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-4 rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, #2C3639 0%, #3F4E4F 100%)', border: '1px solid rgba(220,215,201,0.08)' }}>
               <div className="flex items-center justify-between">
-                <div><p className="text-sm font-bold mb-0.5" style={{ color: '#F4C430' }}>📄 {KO ? 'VIP 건강 활동 요약' : 'VIP Health Activity Summary'}</p><p className="text-[12px]" style={{ color: 'rgba(220,215,201,0.5)' }}>{KO ? 'AI가 분석한 정밀 건강 활동 요약 데이터' : 'AI-powered precision activity summary'}</p></div>
-                <button onClick={() => setShowReport(true)} className="px-3 py-1.5 rounded-xl text-sm font-semibold" style={{ background: 'rgba(162,123,92,0.3)', color: '#c49870' }}>{KO ? '보기' : 'View'}</button>
+                <div>
+                  <p className="text-sm font-bold mb-0.5" style={{ color: '#F4C430' }}>📄 {KO ? 'VIP 건강 활동 요약' : 'VIP Health Activity Summary'}</p>
+                  <p className="text-[12px]" style={{ color: 'rgba(220,215,201,0.5)' }}>{KO ? 'AI가 분석한 정밀 건강 활동 요약 데이터' : 'AI-powered precision activity summary'}</p>
+                  {!isPremium && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <Lock size={10} style={{ color: '#F4C430' }} />
+                      <span className="text-[10px] font-bold" style={{ color: '#F4C430' }}>{KO ? '프리미엄 전용 기능' : 'Premium only'}</span>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    if (!isPremium) { setShowPremiumModal(true); return; }
+                    setShowReport(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-sm font-semibold"
+                  style={{ background: isPremium ? 'rgba(162,123,92,0.3)' : 'rgba(252,211,77,0.2)', color: isPremium ? '#c49870' : '#FCD34D' }}
+                >
+                  {isPremium ? (KO ? '보기' : 'View') : <><Lock size={12} style={{ display: 'inline', marginRight: 4 }} />{KO ? '잠금' : 'Locked'}</>}
+                </button>
               </div>
             </motion.div>
 

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Edit2, Trash2, Check, X, Clock, Utensils, Footprints, Moon, Droplets, Stethoscope, Bath, Tag, Calendar } from 'lucide-react';
 import { useApp, ActivityType, TimelineEntry } from '../App';
 import { addTimelineEntry, updateTimelineEntry, deleteTimelineEntry } from '../../lib/api';
+import { showInterstitialAd } from '../../lib/admob';
 
 // ─── Activity Config ───────────────────────────────────────────────────────────
 const ACTIVITY_CONFIG: Record<ActivityType, { icon: React.ReactNode; labelKO: string; labelEN: string; color: string; bg: string }> = {
@@ -18,7 +19,7 @@ const ACTIVITY_CONFIG: Record<ActivityType, { icon: React.ReactNode; labelKO: st
 // ─── Add Activity Modal (inline bottom sheet) ─────────────────────────────────
 interface AddModalProps { onClose: () => void; petId: string; }
 function AddActivityModal({ onClose, petId }: AddModalProps) {
-  const { lang, timeline, setTimeline } = useApp();
+  const { lang, timeline, setTimeline, isPremium } = useApp();
   const KO = lang === 'KO';
   const [type, setType] = useState<ActivityType>('meal');
   const [time, setTime] = useState(() => {
@@ -68,6 +69,10 @@ function AddActivityModal({ onClose, petId }: AddModalProps) {
 
     setTimeline(prev => [entry, ...prev].sort((a, b) => b.time.localeCompare(a.time)));
     onClose();
+    // Show interstitial for non-premium users
+    if (!isPremium) {
+      await showInterstitialAd();
+    }
   };
 
   return (

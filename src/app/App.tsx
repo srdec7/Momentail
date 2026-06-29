@@ -3,10 +3,13 @@ import { LoginScreen } from './components/LoginScreen';
 import { MainShell } from './components/MainShell';
 import { getProfiles, getTimeline } from '../lib/api';
 import { initializeIAP, checkPremiumStatus } from '../lib/iap';
+import { initializeAdMob, showBannerAd, hideBannerAd, onBannerVisibilityChange, onInterstitialRequest, dismissMockInterstitial } from '../lib/admob';
 import { TRACKS, AudioPlayerModal } from './components/AudioPlayerModal';
 import { PetFormModal } from './components/PetFormModal';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
-import { AnimatePresence } from 'motion/react';
+import { PremiumModal } from './components/PremiumModal';
+import { motion, AnimatePresence } from 'motion/react';
+import { X } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type Lang = 'KO' | 'EN';
@@ -63,6 +66,8 @@ export interface AppContextType {
   setShowPetFormModal: (v: boolean) => void;
   showPrivacyPolicy: boolean;
   setShowPrivacyPolicy: (v: boolean) => void;
+  showPremiumModal: boolean;
+  setShowPremiumModal: (v: boolean) => void;
   editingPet: Pet | null;
   setEditingPet: (p: Pet | null) => void;
   audioCurrentTime: number;
@@ -99,6 +104,116 @@ export function LangToggle() {
   );
 }
 
+// ─── Mock Banner Ad Component ─────────────────────────────────────────────────
+function MockBannerAd({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <motion.div
+      initial={{ y: 60, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 60, opacity: 0 }}
+      transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+      className="w-full flex flex-col items-center justify-center"
+      style={{
+        background: 'linear-gradient(135deg, #1e2d24 0%, #2a3d30 100%)',
+        borderTop: '1px solid rgba(62,109,82,0.3)',
+        padding: '6px 12px',
+        minHeight: 52,
+        zIndex: 25,
+      }}
+    >
+      <div className="flex items-center justify-between w-full max-w-sm">
+        <div className="flex items-center gap-2">
+          <div
+            className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+            style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.5)' }}
+          >
+            광고
+          </div>
+          <div>
+            <p className="text-[12px] font-bold" style={{ color: '#DCD7C9' }}>Momentail Premium</p>
+            <p className="text-[10px]" style={{ color: 'rgba(220,215,201,0.5)' }}>광고 없이 모든 기능 무제한 사용 →</p>
+          </div>
+        </div>
+        <div
+          className="px-3 py-1.5 rounded-xl text-[11px] font-bold"
+          style={{ background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', color: '#78350F' }}
+        >
+          업그레이드
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Mock Interstitial Ad Component ───────────────────────────────────────────
+function MockInterstitialAd({ visible }: { visible: boolean }) {
+  const [countdown, setCountdown] = React.useState(5);
+
+  React.useEffect(() => {
+    if (!visible) { setCountdown(5); return; }
+    setCountdown(5);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) { clearInterval(interval); dismissMockInterstitial(); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [visible]);
+
+  if (!visible) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-[90] flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.9)' }}
+    >
+      <div
+        className="w-full mx-4 rounded-3xl overflow-hidden relative"
+        style={{ background: 'linear-gradient(145deg, #1a2d22, #243b2c)', maxWidth: 340, boxShadow: '0 24px 80px rgba(0,0,0,0.8)' }}
+      >
+        {/* Skip button */}
+        <button
+          onClick={dismissMockInterstitial}
+          className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full"
+          style={{ background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: 700 }}
+        >
+          {countdown > 0 ? `${countdown}초 후 닫기` : <><X size={11} /> 닫기</>}
+        </button>
+
+        {/* Ad Content */}
+        <div className="p-8 text-center">
+          <div className="text-[10px] font-bold mb-4" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em' }}>ADVERTISEMENT</div>
+          <div
+            className="w-20 h-20 rounded-[24px] mx-auto mb-5 flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', boxShadow: '0 12px 30px rgba(245,158,11,0.4)' }}
+          >
+            <span style={{ fontSize: 40 }}>🐾</span>
+          </div>
+          <h3 className="text-xl font-black text-white mb-2">Guardian Family Pack</h3>
+          <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.6)' }}>광고 없는 완벽한 반려견 케어 경험</p>
+          <div className="flex items-center justify-center gap-2 mb-5">
+            <span className="text-base line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>$9.99</span>
+            <span className="text-3xl font-black" style={{ color: '#FCD34D' }}>$3.99</span>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(252,211,77,0.2)', color: '#FCD34D' }}>평생</span>
+          </div>
+          <button
+            onClick={dismissMockInterstitial}
+            className="w-full py-3.5 rounded-2xl font-bold text-sm"
+            style={{ background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', color: '#78350F' }}
+          >
+            지금 업그레이드하기
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── App Component ────────────────────────────────────────────────────────────
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [petsLoaded, setPetsLoaded] = useState(false);
@@ -114,10 +229,13 @@ export default function App() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showPetFormModal, setShowPetFormModal] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isPrivacyRoute, setIsPrivacyRoute] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [mockBannerVisible, setMockBannerVisible] = useState(false);
+  const [mockInterstitialVisible, setMockInterstitialVisible] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -172,13 +290,25 @@ export default function App() {
       setIsPrivacyRoute(true);
     }
 
+    // Initialize AdMob
+    initializeAdMob();
+
     // Initialize IAP and check premium status
     initializeIAP().then(() => {
       checkPremiumStatus().then((isPro) => {
         setIsPremium(isPro);
-        if (isPro) localStorage.setItem('petory_premium', 'true');
+        if (isPro) {
+          localStorage.setItem('petory_premium', 'true');
+        } else {
+          showBannerAd();
+        }
       });
     });
+
+    // Subscribe to mock banner / interstitial state
+    const unsubBanner = onBannerVisibilityChange(v => setMockBannerVisible(v));
+    const unsubInter = onInterstitialRequest(v => setMockInterstitialVisible(v));
+    return () => { unsubBanner(); unsubInter(); };
 
     getProfiles().then((profiles) => {
       if (profiles && profiles.length > 0) {
@@ -236,6 +366,15 @@ export default function App() {
     }).catch(console.error);
   }, [activeTab, selectedPetIdx]);
 
+  // When premium status changes, show/hide banner
+  useEffect(() => {
+    if (isPremium) {
+      hideBannerAd();
+    } else if (user) {
+      showBannerAd();
+    }
+  }, [isPremium, user]);
+
   const ctx: AppContextType = {
     user,
     lang, setLang, isPremium, setIsPremium,
@@ -248,6 +387,7 @@ export default function App() {
     showProfileDropdown, setShowProfileDropdown,
     showPetFormModal, setShowPetFormModal,
     showPrivacyPolicy, setShowPrivacyPolicy,
+    showPremiumModal, setShowPremiumModal,
     editingPet, setEditingPet,
     audioCurrentTime, audioDuration, seekAudio,
   };
@@ -344,7 +484,16 @@ export default function App() {
             <AnimatePresence>{showAudioModal && <AudioPlayerModal />}</AnimatePresence>
             <AnimatePresence>{showPetFormModal && <PetFormModal />}</AnimatePresence>
             <AnimatePresence>{showPrivacyPolicy && <PrivacyPolicy onClose={() => setShowPrivacyPolicy(false)} />}</AnimatePresence>
+            <AnimatePresence>{showPremiumModal && <PremiumModal />}</AnimatePresence>
+            {/* Mock interstitial overlay (web) */}
+            <AnimatePresence>
+              {mockInterstitialVisible && <MockInterstitialAd visible={mockInterstitialVisible} />}
+            </AnimatePresence>
           </div>
+          {/* Mock banner ad (web) — sits below main content, above safe-area */}
+          <AnimatePresence>
+            {!isPremium && user && <MockBannerAd visible={mockBannerVisible} />}
+          </AnimatePresence>
         </div>
       </div>
     </AppContext.Provider>

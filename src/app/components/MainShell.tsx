@@ -6,19 +6,24 @@ import { ProfileTab } from './ProfileTab';
 import { TimelineTab } from './TimelineTab';
 import { InsightsTab } from './InsightsTab';
 import { AudioPlayerModal } from './AudioPlayerModal';
-import { PremiumModal } from './PremiumModal';
 
-
-// ─── Pet Dropdown ─────────────────────────────────────────────────────────────
+// ─── Pet Dropdown ─────────────────────────────────────────────────────────────────
 function PetDropdown() {
-  const { pets, setPets, selectedPetIdx, setSelectedPetIdx, showProfileDropdown, setShowProfileDropdown, lang, setShowPetFormModal, setEditingPet, setShowPrivacyPolicy } = useApp();
+  const { pets, setPets, selectedPetIdx, setSelectedPetIdx, showProfileDropdown, setShowProfileDropdown, lang, setShowPetFormModal, setEditingPet, setShowPrivacyPolicy, isPremium, setShowPremiumModal } = useApp();
   const current = pets[selectedPetIdx];
+  const FREE_PET_LIMIT = 2;
 
   const handleAddPet = () => {
     setShowProfileDropdown(false);
+    // Block non-premium users from adding more than 2 pets
+    if (!isPremium && pets.length >= FREE_PET_LIMIT) {
+      setShowPremiumModal(true);
+      return;
+    }
     setEditingPet(null);      // null = add mode
     setShowPetFormModal(true);
   };
+
 
   return (
     <div className="relative">
@@ -192,7 +197,7 @@ const NAV_ITEMS = [
 
 // ─── Main Shell ───────────────────────────────────────────────────────────────
 export function MainShell() {
-  const { activeTab, setActiveTab, lang, showAudioModal, setShowAudioModal, isAudioPlaying } = useApp();
+  const { activeTab, setActiveTab, lang, showAudioModal, setShowAudioModal, isAudioPlaying, isPremium, setShowPremiumModal } = useApp();
   const KO = lang === 'KO';
 
   const TAB_MAP = {
@@ -228,9 +233,23 @@ export function MainShell() {
             </div>
           </div>
 
-          {/* Right: Lang Toggle */}
+          {/* Right: Lang Toggle + Crown */}
           <div className="flex flex-col items-end gap-1.5 mt-1">
             <LangToggle />
+            {!isPremium && (
+              <button
+                onClick={() => setShowPremiumModal(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
+                style={{
+                  background: 'linear-gradient(135deg, #FCD34D, #F59E0B)',
+                  color: '#78350F',
+                  boxShadow: '0 2px 8px rgba(245,158,11,0.3)',
+                }}
+              >
+                <Crown size={10} />
+                PRO
+              </button>
+            )}
           </div>
         </div>
       </div>

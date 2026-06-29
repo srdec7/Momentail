@@ -68,7 +68,7 @@ function BentoTile({ icon, label, value, sub, color, bg, delay = 0 }: TileProps)
 
 // ─── Profile Tab ──────────────────────────────────────────────────────────────
 export function ProfileTab() {
-  const { lang, pets, selectedPetIdx, setPets, setShowPetFormModal, setEditingPet, setActiveTab, setShowAudioModal } = useApp();
+  const { lang, pets, selectedPetIdx, setPets, setShowPetFormModal, setEditingPet, setActiveTab, setShowAudioModal, isPremium, setShowPremiumModal } = useApp();
   const KO = lang === 'KO';
 
   const pet = pets[selectedPetIdx] || pets[0];
@@ -136,6 +136,25 @@ export function ProfileTab() {
                   <h2 className="text-xl font-bold text-white">{pet?.name}</h2>
                   <button onClick={handleEditPet} style={{ color: 'rgba(255,255,255,0.5)' }}><Edit2 size={13} /></button>
                 </div>
+                {/* PRO badge / upgrade button */}
+                {isPremium ? (
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold"
+                    style={{ background: 'linear-gradient(135deg, #3B82F6, #2563EB)', color: '#fff', boxShadow: '0 4px 10px rgba(37,99,235,0.25)' }}
+                  >
+                    <Crown size={12} style={{ color: '#fff' }} />
+                    {KO ? 'PRO 사용자' : 'PRO User'}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowPremiumModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-transform active:scale-95"
+                    style={{ background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', color: '#78350F', boxShadow: '0 4px 10px rgba(245,158,11,0.25)' }}
+                  >
+                    <Crown size={12} style={{ color: '#78350F' }} />
+                    {KO ? 'Pro 업그레이드' : 'Pro Upgrade'}
+                  </button>
+                )}
               </div>
               <p className="text-sm mb-2.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {pet?.breed || (lang === 'KO' ? '견종 미입력' : 'No breed set')}
@@ -204,6 +223,49 @@ export function ProfileTab() {
         </div>
       </motion.div>
 
+      {/* ── Premium Upsell / Active Banner ── */}
+      {isPremium ? (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
+          className="rounded-2xl p-4"
+          style={{ background: 'linear-gradient(135deg, #3E6D52 0%, #5a9970 100%)' }}
+        >
+          <div className="flex items-center gap-2">
+            <Crown size={16} style={{ color: '#F4C430' }} />
+            <div>
+              <p className="text-sm font-bold text-white">{KO ? '가디언 프리미엄 활성 중' : 'Guardian Premium Active'}</p>
+              <p className="text-[12px] text-white/70">{KO ? '모든 프리미엄 기능을 이용 중입니다' : 'All premium features are unlocked'}</p>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
+          className="rounded-2xl p-4"
+          style={{ background: 'linear-gradient(135deg, #1A2421 0%, #2C3E35 100%)', boxShadow: '0 4px 20px rgba(26,36,33,0.2)' }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Crown size={14} style={{ color: '#F4C430' }} />
+                <span className="text-sm font-bold" style={{ color: '#F4C430' }}>{KO ? '가디언 패밀리팩' : 'Guardian Family Pack'}</span>
+              </div>
+              <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{KO ? '무제한 프로필 · 프리미엄 오디오 · VIP 리포트' : 'Unlimited profiles · Premium audio · VIP reports'}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-base font-black text-white">$3.99</span>
+                <span className="text-[11px] px-1.5 py-0.5 rounded-md font-bold" style={{ background: '#A27B5C', color: '#fff' }}>One-Time</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowPremiumModal(true)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-semibold"
+              style={{ background: 'linear-gradient(135deg, #3E6D52, #5a9970)', color: '#fff' }}
+            >
+              {KO ? '보기' : 'View'}<ChevronRight size={12} />
+            </button>
+          </div>
+        </motion.div>
+      )}
 
     </div>
   );
