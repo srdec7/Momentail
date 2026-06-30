@@ -139,8 +139,7 @@ export async function showBannerAd() {
   const plugin = await getAdMob();
   if (_nativeBannerVisible) return;
   if (!plugin) {
-    console.warn('[AdMob] Banner plugin unavailable, showing in-app fallback');
-    setMockBannerVisible(true);
+    console.warn('[AdMob] Banner plugin unavailable');
     return;
   }
 
@@ -158,7 +157,6 @@ export async function showBannerAd() {
     _nativeBannerVisible = true;
   } catch (e) {
     console.error('[AdMob] showBanner error', e);
-    setMockBannerVisible(true);
   }
 }
 
@@ -187,10 +185,6 @@ export async function hideBannerAd() {
 export async function showInterstitialAd(): Promise<void> {
   const platform = Capacitor.getPlatform();
 
-  if (AD_TEST_MODE) {
-    console.log('[AdMob] Showing in-app test interstitial fallback', { platform });
-    await showMockInterstitialOverlay();
-  }
 
   if (platform === 'web') {
     return;
@@ -199,8 +193,7 @@ export async function showInterstitialAd(): Promise<void> {
   await initializeAdMob();
   const plugin = await getAdMob();
   if (!plugin) {
-    console.warn('[AdMob] Interstitial plugin unavailable, showing in-app fallback');
-    if (!AD_TEST_MODE) await showMockInterstitialOverlay();
+    console.warn('[AdMob] Interstitial plugin unavailable');
     return;
   }
 
@@ -219,7 +212,7 @@ export async function showInterstitialAd(): Promise<void> {
         finished = true;
         clearTimeout(timeoutId);
         await Promise.all(handles.map(removeListener));
-        if (showFallback && !AD_TEST_MODE) await showMockInterstitialOverlay();
+        if (showFallback && platform === 'web') await showMockInterstitialOverlay();
         resolve();
       };
 
