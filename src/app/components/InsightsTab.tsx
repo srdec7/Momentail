@@ -466,8 +466,12 @@ export function InsightsTab() {
                   )}
                 </div>
                 <button
-                  onClick={() => {
-                    if (!isPremium) { setShowPremiumModal(true); return; }
+                  onClick={async () => {
+                    if (!isPremium) {
+                      await showInterstitialAd();
+                      setShowPremiumModal(true);
+                      return;
+                    }
                     setShowReport(true);
                   }}
                   className="px-3 py-1.5 rounded-xl text-sm font-semibold"

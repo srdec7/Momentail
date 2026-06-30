@@ -14,6 +14,7 @@ export const ADMOB_CONFIG = {
 };
 
 const isNative = () => Capacitor.getPlatform() !== 'web';
+const AD_TEST_MODE = true;
 
 let _mockBannerVisible = false;
 const _bannerListeners: ((visible: boolean) => void)[] = [];
@@ -49,6 +50,7 @@ function triggerMockInterstitial(show: boolean) {
 
 let _adMob: any = null;
 let _initialized = false;
+let _initializing: Promise<void> | null = null;
 let _nativeBannerVisible = false;
 
 async function getAdMob() {
@@ -79,14 +81,21 @@ export async function initializeAdMob() {
     return;
   }
   if (_initialized) return;
+  if (_initializing) return _initializing;
 
-  try {
-    await plugin.initialize({ requestTrackingAuthorization: true });
-    _initialized = true;
-    console.log('[AdMob] Initialized successfully');
-  } catch (e) {
-    console.error('[AdMob] Init error', e);
-  }
+  _initializing = (async () => {
+    try {
+      await plugin.initialize({ requestTrackingAuthorization: true, initializeForTesting: AD_TEST_MODE });
+      _initialized = true;
+      console.log('[AdMob] Initialized successfully');
+    } catch (e) {
+      console.error('[AdMob] Init error', e);
+    } finally {
+      _initializing = null;
+    }
+  })();
+
+  return _initializing;
 }
 
 export async function showBannerAd() {
@@ -97,6 +106,7 @@ export async function showBannerAd() {
     return;
   }
 
+  await initializeAdMob();
   const plugin = await getAdMob();
   if (!plugin || _nativeBannerVisible) return;
 
@@ -111,7 +121,7 @@ export async function showBannerAd() {
       adSize: BannerAdSize.ADAPTIVE_BANNER,
       position: BannerAdPosition.BOTTOM_CENTER,
       margin: 0,
-      isTesting: false,
+      isTesting: AD_TEST_MODE,
     });
     _nativeBannerVisible = true;
   } catch (e) {
@@ -127,6 +137,7 @@ export async function hideBannerAd() {
     return;
   }
 
+  await initializeAdMob();
   const plugin = await getAdMob();
   if (!plugin || !_nativeBannerVisible) return;
 
@@ -160,6 +171,7 @@ export async function showInterstitialAd(): Promise<void> {
     });
   }
 
+  await initializeAdMob();
   const plugin = await getAdMob();
   if (!plugin) return;
 
@@ -173,7 +185,6 @@ export async function showInterstitialAd(): Promise<void> {
 
     await new Promise<void>(async (resolve) => {
       let finished = false;
-      let shown = false;
       let timeoutId: ReturnType<typeof setTimeout>;
 
       const finish = async () => {
@@ -185,26 +196,22 @@ export async function showInterstitialAd(): Promise<void> {
       };
 
       handles.push(await plugin.addListener(InterstitialAdPluginEvents.Dismissed, finish));
-      handles.push(await plugin.addListener(InterstitialAdPluginEvents.FailedToShow, finish));
-      handles.push(await plugin.addListener(InterstitialAdPluginEvents.FailedToLoad, finish));
-      handles.push(await plugin.addListener(InterstitialAdPluginEvents.Showed, () => { shown = true; }));
-      handles.push(await plugin.addListener(InterstitialAdPluginEvents.Loaded, async () => {
-        try {
-          await plugin.showInterstitial();
-        } catch (e) {
-          console.error('[AdMob] showInterstitial error', e);
-          finish();
-        }
+      handles.push(await plugin.addListener(InterstitialAdPluginEvents.FailedToShow, (error: any) => {
+        console.error('[AdMob] interstitial failed to show', error);
+        finish();
+      }));
+      handles.push(await plugin.addListener(InterstitialAdPluginEvents.FailedToLoad, (error: any) => {
+        console.error('[AdMob] interstitial failed to load', error);
+        finish();
       }));
 
-      timeoutId = setTimeout(() => {
-        if (!shown) finish();
-      }, 15000);
+      timeoutId = setTimeout(finish, 30000);
 
       try {
-        await plugin.prepareInterstitial({ adId: unitId, isTesting: false });
+        await plugin.prepareInterstitial({ adId: unitId, isTesting: AD_TEST_MODE });
+        await plugin.showInterstitial();
       } catch (e) {
-        console.error('[AdMob] prepareInterstitial error', e);
+        console.error('[AdMob] prepare/show interstitial error', e);
         finish();
       }
     });
