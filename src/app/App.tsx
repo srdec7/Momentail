@@ -319,7 +319,12 @@ export default function App() {
     }
 
     // Initialize AdMob
-    initializeAdMob();
+    console.log('[PetoryAds] App mounted; initializing ads', { platform: (window as any).Capacitor?.getPlatform?.() });
+    initializeAdMob().catch(error => console.error('[PetoryAds] Initial AdMob init failed', error));
+    const adInitTimer = window.setTimeout(() => {
+      console.log('[PetoryAds] Retrying delayed AdMob init');
+      initializeAdMob().catch(error => console.error('[PetoryAds] Delayed AdMob init failed', error));
+    }, 1200);
 
     // Initialize IAP and check premium status
     initializeIAP().then(() => {
@@ -346,7 +351,7 @@ export default function App() {
       setPetsLoaded(true);
     });
 
-    return () => { unsubBanner(); unsubInter(); };
+    return () => { window.clearTimeout(adInitTimer); unsubBanner(); unsubInter(); };
   }, []);
 
   // ─── Reload profiles & timeline on tab/pet change ────────────────────────────
@@ -377,13 +382,22 @@ export default function App() {
 
   // When premium status changes, show/hide banner
   useEffect(() => {
+    const timers: number[] = [];
+
     if (isPremium) {
+      console.log('[PetoryAds] Premium user detected; hiding banner');
       hideBannerAd();
     } else if (user) {
+      console.log('[PetoryAds] Non-premium user detected; requesting banner');
       showBannerAd();
+      timers.push(window.setTimeout(() => showBannerAd(), 1000));
+      timers.push(window.setTimeout(() => showBannerAd(), 3500));
     } else {
+      console.log('[PetoryAds] No app user yet; hiding banner');
       hideBannerAd();
     }
+
+    return () => timers.forEach(timer => window.clearTimeout(timer));
   }, [isPremium, user]);
 
   const ctx: AppContextType = {
@@ -482,9 +496,11 @@ export default function App() {
                     }
                     setPetsLoaded(true);
                     setUser(usr);
+                    window.setTimeout(() => showBannerAd(), 250);
                   }).catch(() => {
                     setPetsLoaded(true);
                     setUser(usr);
+                    window.setTimeout(() => showBannerAd(), 250);
                   });
                 }
               }} />

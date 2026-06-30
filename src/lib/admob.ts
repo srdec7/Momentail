@@ -89,6 +89,8 @@ let _initializing: Promise<void> | null = null;
 let _nativeBannerVisible = false;
 
 async function getAdMob() {
+  const platform = Capacitor.getPlatform();
+  console.log('[PetoryAds] Resolving AdMob plugin', { platform, isNative: isNative(), hasPlugin: Boolean(AdMob) });
   if (!isNative()) return null;
   if (!_adMob) _adMob = AdMob;
   return _adMob;
@@ -103,6 +105,7 @@ async function removeListener(handle: any) {
 }
 
 export async function initializeAdMob() {
+  console.log('[PetoryAds] initializeAdMob requested', { platform: Capacitor.getPlatform() });
   const plugin = await getAdMob();
   if (!plugin) {
     console.log('[AdMob] Web mode: using mock ads');
@@ -114,7 +117,7 @@ export async function initializeAdMob() {
   _initializing = (async () => {
     try {
       console.log('[AdMob] Initializing', { platform: Capacitor.getPlatform(), testMode: AD_TEST_MODE });
-      await plugin.initialize({ requestTrackingAuthorization: true, initializeForTesting: AD_TEST_MODE });
+      await plugin.initialize({ requestTrackingAuthorization: false, initializeForTesting: AD_TEST_MODE });
       _initialized = true;
       console.log('[AdMob] Initialized successfully');
     } catch (e) {
@@ -129,6 +132,7 @@ export async function initializeAdMob() {
 
 export async function showBannerAd() {
   const platform = Capacitor.getPlatform();
+  console.log('[PetoryAds] showBannerAd requested', { platform, alreadyVisible: _nativeBannerVisible });
 
   if (platform === 'web') {
     setMockBannerVisible(true);
@@ -184,6 +188,7 @@ export async function hideBannerAd() {
 
 export async function showInterstitialAd(): Promise<void> {
   const platform = Capacitor.getPlatform();
+  console.log('[PetoryAds] showInterstitialAd requested', { platform });
 
 
   if (platform === 'web') {
