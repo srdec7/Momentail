@@ -307,7 +307,6 @@ export default function App() {
     // Subscribe to mock banner / interstitial state
     const unsubBanner = onBannerVisibilityChange(v => setMockBannerVisible(v));
     const unsubInter = onInterstitialRequest(v => setMockInterstitialVisible(v));
-    return () => { unsubBanner(); unsubInter(); };
 
     getProfiles().then((profiles) => {
       if (profiles && profiles.length > 0) {
@@ -329,6 +328,8 @@ export default function App() {
     }).catch(console.error).finally(() => {
       setIsBootstrapping(false);
     });
+
+    return () => { unsubBanner(); unsubInter(); };
   }, []);
 
   // ─── Reload profiles & timeline on tab/pet change ────────────────────────────
