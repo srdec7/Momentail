@@ -1,5 +1,4 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import { BannerAdPosition, BannerAdSize, InterstitialAdPluginEvents } from '@capacitor-community/admob';
 
 export const ADMOB_CONFIG = {
   ios: {
@@ -16,6 +15,20 @@ export const ADMOB_CONFIG = {
 
 const isNative = () => Capacitor.getPlatform() !== 'web';
 const AD_TEST_MODE = true;
+
+const BannerAdPosition = {
+  BOTTOM_CENTER: 'BOTTOM_CENTER',
+} as const;
+
+const BannerAdSize = {
+  ADAPTIVE_BANNER: 'ADAPTIVE_BANNER',
+} as const;
+
+const InterstitialAdPluginEvents = {
+  Dismissed: 'interstitialAdDismissed',
+  FailedToShow: 'interstitialAdFailedToShow',
+  FailedToLoad: 'interstitialAdFailedToLoad',
+} as const;
 
 const ADMOB_TEST_UNITS = {
   ios: {
@@ -132,11 +145,11 @@ export async function initializeAdMob() {
 
   _initializing = (async () => {
     try {
-      console.log('[AdMob] Initializing', {
+      console.log('[AdMob] Initializing start', {
         platform: Capacitor.getPlatform(),
         testMode: AD_TEST_MODE,
-        hasInitialize: typeof plugin.initialize === 'function',
       });
+      console.log('[AdMob] initialize proxy ready');
       await plugin.initialize({ requestTrackingAuthorization: false, initializeForTesting: AD_TEST_MODE });
       _initialized = true;
       console.log('[AdMob] Initialized successfully');
