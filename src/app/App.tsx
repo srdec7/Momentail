@@ -39,6 +39,34 @@ export interface TimelineEntry {
   unit?: string;
 }
 
+const DEFAULT_PET_PHOTO = 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400';
+
+function profileToPet(p: any): Pet {
+  return {
+    id: p.id,
+    name: p.name || 'My Pet',
+    breed: p.breed || '',
+    birthdate: p.birthdate || '2024-01',
+    photo: p.photo || DEFAULT_PET_PHOTO,
+    weight: parseFloat(p.weight) || 0,
+    weightUnit: p.weightUnit || 'kg',
+    lastVaccine: p.lastVaccine || '',
+    nextVet: p.nextVet || ''
+  };
+}
+
+function loadCachedPets(): Pet[] {
+  try {
+    if (typeof window === 'undefined') return [];
+    const raw = window.localStorage.getItem('petory_profiles');
+    const profiles = raw ? JSON.parse(raw) : [];
+    return Array.isArray(profiles) ? profiles.map(profileToPet) : [];
+  } catch (e) {
+    console.error('Error reading cached pets', e);
+    return [];
+  }
+}
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 export interface AppContextType {
   user: any;
@@ -217,11 +245,10 @@ function MockInterstitialAd({ visible }: { visible: boolean }) {
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [petsLoaded, setPetsLoaded] = useState(false);
-  const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [lang, setLang] = useState<Lang>('EN');
   const [isPremium, setIsPremium] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('profile');
-  const [pets, setPets] = useState<Pet[]>([]);
+  const [pets, setPets] = useState<Pet[]>(() => loadCachedPets());
   const [selectedPetIdx, setSelectedPetIdx] = useState(0);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -310,23 +337,13 @@ export default function App() {
 
     getProfiles().then((profiles) => {
       if (profiles && profiles.length > 0) {
-        const loadedPets: Pet[] = profiles.map((p: any) => ({
-          id: p.id,
-          name: p.name || 'My Pet',
-          breed: p.breed || '',
-          birthdate: p.birthdate || '2024-01',
-          photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-          weight: parseFloat(p.weight) || 0,
-          weightUnit: p.weightUnit || 'kg',
-          lastVaccine: p.lastVaccine || '',
-          nextVet: p.nextVet || ''
-        }));
+        const loadedPets: Pet[] = profiles.map(profileToPet);
         setPets(loadedPets);
         // Do NOT set user here - always show first screen first
       }
       setPetsLoaded(true);
     }).catch(console.error).finally(() => {
-      setIsBootstrapping(false);
+      setPetsLoaded(true);
     });
 
     return () => { unsubBanner(); unsubInter(); };
@@ -337,17 +354,7 @@ export default function App() {
     if (!user || !petsLoaded) return;
     getProfiles().then(async (profiles) => {
       if (profiles && profiles.length > 0) {
-        const loadedPets: Pet[] = profiles.map((p: any) => ({
-          id: p.id,
-          name: p.name || 'My Pet',
-          breed: p.breed || '',
-          birthdate: p.birthdate || '2024-01',
-          photo: p.photo || 'https://images.unsplash.com/photo-1608262941082-65cfdb51c571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
-          weight: parseFloat(p.weight) || 0,
-          weightUnit: p.weightUnit || 'kg',
-          lastVaccine: p.lastVaccine || '',
-          nextVet: p.nextVet || ''
-        }));
+        const loadedPets: Pet[] = profiles.map(profileToPet);
         setPets(loadedPets);
 
         const currentPet = loadedPets[selectedPetIdx];
@@ -454,14 +461,7 @@ export default function App() {
 
 
           <div className="flex-1 w-full h-full relative overflow-hidden flex flex-col">
-            {isBootstrapping ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <div
-                  className="w-10 h-10 rounded-full animate-pulse"
-                  style={{ background: 'rgba(26,36,38,0.18)' }}
-                />
-              </div>
-            ) : !user ? (
+            {!user ? (
               <LoginScreen onLogin={(usr) => {
                 if (usr) {
                   // Load pets before showing MainShell
