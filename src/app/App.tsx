@@ -217,6 +217,7 @@ function MockInterstitialAd({ visible }: { visible: boolean }) {
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [petsLoaded, setPetsLoaded] = useState(false);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [lang, setLang] = useState<Lang>('EN');
   const [isPremium, setIsPremium] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -299,8 +300,6 @@ export default function App() {
         setIsPremium(isPro);
         if (isPro) {
           localStorage.setItem('petory_premium', 'true');
-        } else {
-          showBannerAd();
         }
       });
     });
@@ -324,10 +323,12 @@ export default function App() {
           nextVet: p.nextVet || ''
         }));
         setPets(loadedPets);
-        setPetsLoaded(true);
         // Do NOT set user here - always show first screen first
       }
-    }).catch(console.error);
+      setPetsLoaded(true);
+    }).catch(console.error).finally(() => {
+      setIsBootstrapping(false);
+    });
   }, []);
 
   // ─── Reload profiles & timeline on tab/pet change ────────────────────────────
@@ -372,6 +373,8 @@ export default function App() {
       hideBannerAd();
     } else if (user) {
       showBannerAd();
+    } else {
+      hideBannerAd();
     }
   }, [isPremium, user]);
 
@@ -450,7 +453,14 @@ export default function App() {
 
 
           <div className="flex-1 w-full h-full relative overflow-hidden flex flex-col">
-            {!user ? (
+            {isBootstrapping ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <div
+                  className="w-10 h-10 rounded-full animate-pulse"
+                  style={{ background: 'rgba(26,36,38,0.18)' }}
+                />
+              </div>
+            ) : !user ? (
               <LoginScreen onLogin={(usr) => {
                 if (usr) {
                   // Load pets before showing MainShell
