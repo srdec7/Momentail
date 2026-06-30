@@ -42,7 +42,16 @@ export async function checkPremiumStatus(): Promise<boolean> {
 
   try {
     const customerInfo = await Purchases.getCustomerInfo();
-    return typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== "undefined";
+    const activeKeys = Object.keys(customerInfo.entitlements.active);
+    console.log('[IAP] Active entitlement keys:', JSON.stringify(activeKeys));
+    console.log('[IAP] Checking for ENTITLEMENT_ID:', ENTITLEMENT_ID);
+    // Check the configured entitlement ID, or any active entitlement as fallback
+    const hasPro = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined';
+    const hasAny = activeKeys.length > 0;
+    if (!hasPro && hasAny) {
+      console.warn('[IAP] ENTITLEMENT_ID mismatch! Active keys:', activeKeys, '— check ENTITLEMENT_ID in iap.ts');
+    }
+    return hasPro || hasAny;
   } catch (error) {
     console.error('Error checking premium status:', error);
     return false;
@@ -86,21 +95,26 @@ export async function purchasePro(): Promise<boolean> {
 
   try {
     const offerings = await Purchases.getOfferings();
+    let purchaseResult: any = null;
+
     if (offerings.current && offerings.current.availablePackages.length > 0) {
       const packageToBuy = offerings.current.availablePackages[0];
-      const purchaseResult = await Purchases.purchasePackage({ aPackage: packageToBuy });
-      
-      if (typeof purchaseResult.customerInfo.entitlements.active[ENTITLEMENT_ID] !== "undefined") {
-        return true;
-      }
+      purchaseResult = await Purchases.purchasePackage({ aPackage: packageToBuy });
     } else {
       // Fallback: Purchase specific product ID directly
-      const purchaseResult = await Purchases.purchaseProduct({ productIdentifier: PRODUCT_ID });
-      // Usually purchasing successfully means it's active. Let's return true.
-      return true;
+      purchaseResult = await Purchases.purchaseProduct({ productIdentifier: PRODUCT_ID });
+    }
+
+    if (purchaseResult) {
+      const activeKeys = Object.keys(purchaseResult.customerInfo.entitlements.active);
+      console.log('[IAP] Post-purchase active entitlements:', JSON.stringify(activeKeys));
+      // Grant premium if the exact entitlement matches OR if any entitlement is active
+      const hasPro = typeof purchaseResult.customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined';
+      const hasAny = activeKeys.length > 0;
+      return hasPro || hasAny;
     }
   } catch (error: any) {
-    if (error.code === 'PURCHASE_CANCELLED' || error.message.includes('cancel')) {
+    if (error.code === 'PURCHASE_CANCELLED' || (error.message && error.message.includes('cancel'))) {
       console.log('User cancelled purchase');
       return false;
     }
@@ -117,7 +131,11 @@ export async function restorePurchases(): Promise<boolean> {
 
   try {
     const customerInfo = await Purchases.restorePurchases();
-    return typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== "undefined";
+    const activeKeys = Object.keys(customerInfo.entitlements.active);
+    console.log('[IAP] Restore — active entitlements:', JSON.stringify(activeKeys));
+    const hasPro = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined';
+    const hasAny = activeKeys.length > 0;
+    return hasPro || hasAny;
   } catch (error) {
     console.error('Error restoring purchases:', error);
     throw error;
