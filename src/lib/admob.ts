@@ -24,6 +24,8 @@ const BannerAdSize = {
   ADAPTIVE_BANNER: 'ADAPTIVE_BANNER',
 } as const;
 
+const NATIVE_BANNER_BOTTOM_MARGIN = 96;
+
 const InterstitialAdPluginEvents = {
   Dismissed: 'interstitialAdDismissed',
   FailedToShow: 'interstitialAdFailedToShow',
@@ -182,13 +184,19 @@ export async function showBannerAd() {
 
   try {
     const unitId = getAdUnitId(platform, 'bannerId');
-    console.log('[AdMob] Showing banner', { platform, adId: unitId, testMode: AD_TEST_MODE });
+    console.log('[AdMob] Showing banner', {
+      platform,
+      adId: unitId,
+      testMode: AD_TEST_MODE,
+      margin: NATIVE_BANNER_BOTTOM_MARGIN,
+    });
 
     await plugin.showBanner({
       adId: unitId,
       adSize: BannerAdSize.ADAPTIVE_BANNER,
       position: BannerAdPosition.BOTTOM_CENTER,
-      margin: 0,
+      // Keep the native AdMob banner above the in-app bottom navigation.
+      margin: NATIVE_BANNER_BOTTOM_MARGIN,
       isTesting: AD_TEST_MODE,
     });
     _nativeBannerVisible = true;
