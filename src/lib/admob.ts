@@ -166,43 +166,8 @@ export async function initializeAdMob() {
 }
 
 export async function showBannerAd() {
-  const platform = Capacitor.getPlatform();
-  console.log('[PetoryAds] showBannerAd requested', { platform, alreadyVisible: _nativeBannerVisible });
-
-  if (platform === 'web') {
-    setMockBannerVisible(true);
-    return;
-  }
-
-  await initializeAdMob();
-  const plugin = getAdMob();
-  if (_nativeBannerVisible) return;
-  if (!plugin) {
-    console.warn('[AdMob] Banner plugin unavailable');
-    return;
-  }
-
-  try {
-    const unitId = getAdUnitId(platform, 'bannerId');
-    console.log('[AdMob] Showing banner', {
-      platform,
-      adId: unitId,
-      testMode: AD_TEST_MODE,
-      margin: NATIVE_BANNER_BOTTOM_MARGIN,
-    });
-
-    await plugin.showBanner({
-      adId: unitId,
-      adSize: BannerAdSize.ADAPTIVE_BANNER,
-      position: BannerAdPosition.BOTTOM_CENTER,
-      // Keep the native AdMob banner above the in-app bottom navigation.
-      margin: NATIVE_BANNER_BOTTOM_MARGIN,
-      isTesting: AD_TEST_MODE,
-    });
-    _nativeBannerVisible = true;
-  } catch (e) {
-    console.error('[AdMob] showBanner error', e);
-  }
+  console.log('[PetoryAds] Banner ads disabled; skipping banner request');
+  setMockBannerVisible(false);
 }
 
 export async function hideBannerAd() {
