@@ -3,7 +3,7 @@ import { LoginScreen } from './components/LoginScreen';
 import { MainShell } from './components/MainShell';
 import { getProfiles, getTimeline } from '../lib/api';
 import { initializeIAP, checkPremiumStatus } from '../lib/iap';
-import { initializeAdMob, showBannerAd, hideBannerAd, onBannerVisibilityChange, onInterstitialRequest, dismissMockInterstitial } from '../lib/admob';
+import { initializeAdMob, showBannerAd, hideBannerAd, showInterstitialAd, onBannerVisibilityChange, onInterstitialRequest, dismissMockInterstitial } from '../lib/admob';
 import { TRACKS, AudioPlayerModal } from './components/AudioPlayerModal';
 import { PetFormModal } from './components/PetFormModal';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
@@ -265,6 +265,7 @@ export default function App() {
   const [mockBannerVisible, setMockBannerVisible] = useState(false);
   const [mockInterstitialVisible, setMockInterstitialVisible] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const premiumModalAdShownRef = useRef(false);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -378,13 +379,26 @@ export default function App() {
   // When premium status changes, show/hide banner
   useEffect(() => {
     if (isPremium) {
+      setMockBannerVisible(false);
       hideBannerAd();
     } else if (user) {
+      setMockBannerVisible(true);
       showBannerAd();
     } else {
+      setMockBannerVisible(false);
       hideBannerAd();
     }
   }, [isPremium, user]);
+
+  useEffect(() => {
+    if (!showPremiumModal) {
+      premiumModalAdShownRef.current = false;
+      return;
+    }
+    if (isPremium || premiumModalAdShownRef.current) return;
+    premiumModalAdShownRef.current = true;
+    showInterstitialAd();
+  }, [showPremiumModal, isPremium]);
 
   const ctx: AppContextType = {
     user,
