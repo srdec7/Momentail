@@ -1,5 +1,5 @@
-import { Capacitor } from '@capacitor/core';
-import { AdMob, BannerAdPosition, BannerAdSize, InterstitialAdPluginEvents } from '@capacitor-community/admob';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+import { BannerAdPosition, BannerAdSize, InterstitialAdPluginEvents } from '@capacitor-community/admob';
 
 export const ADMOB_CONFIG = {
   ios: {
@@ -87,12 +87,28 @@ let _adMob: any = null;
 let _initialized = false;
 let _initializing: Promise<void> | null = null;
 let _nativeBannerVisible = false;
+const NativeAdMob = registerPlugin<any>('AdMob');
 
 async function getAdMob() {
   const platform = Capacitor.getPlatform();
-  console.log('[PetoryAds] Resolving AdMob plugin', { platform, isNative: isNative(), hasPlugin: Boolean(AdMob) });
+  const isAvailable = typeof Capacitor.isPluginAvailable === 'function'
+    ? Capacitor.isPluginAvailable('AdMob')
+    : Boolean((window as any)?.Capacitor?.PluginHeaders?.find?.((header: any) => header?.name === 'AdMob'));
+
+  console.log('[PetoryAds] Resolving AdMob plugin', {
+    platform,
+    isNative: isNative(),
+    isAvailable,
+    hasRegisterPluginProxy: Boolean(NativeAdMob),
+  });
+
   if (!isNative()) return null;
-  if (!_adMob) _adMob = AdMob;
+  if (!isAvailable) {
+    console.warn('[AdMob] Native plugin header not available');
+    return null;
+  }
+
+  if (!_adMob) _adMob = NativeAdMob;
   return _adMob;
 }
 
@@ -116,7 +132,11 @@ export async function initializeAdMob() {
 
   _initializing = (async () => {
     try {
-      console.log('[AdMob] Initializing', { platform: Capacitor.getPlatform(), testMode: AD_TEST_MODE });
+      console.log('[AdMob] Initializing', {
+        platform: Capacitor.getPlatform(),
+        testMode: AD_TEST_MODE,
+        hasInitialize: typeof plugin.initialize === 'function',
+      });
       await plugin.initialize({ requestTrackingAuthorization: false, initializeForTesting: AD_TEST_MODE });
       _initialized = true;
       console.log('[AdMob] Initialized successfully');
