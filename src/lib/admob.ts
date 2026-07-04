@@ -14,7 +14,7 @@ export const ADMOB_CONFIG = {
 };
 
 const isNative = () => Capacitor.getPlatform() !== 'web';
-const AD_TEST_MODE = true;
+const AD_TEST_MODE = false;
 const NON_PERSONALIZED_ADS = true;
 
 const InterstitialAdPluginEvents = {
