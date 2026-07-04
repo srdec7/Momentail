@@ -15,16 +15,7 @@ export const ADMOB_CONFIG = {
 
 const isNative = () => Capacitor.getPlatform() !== 'web';
 const AD_TEST_MODE = true;
-
-const BannerAdPosition = {
-  BOTTOM_CENTER: 'BOTTOM_CENTER',
-} as const;
-
-const BannerAdSize = {
-  ADAPTIVE_BANNER: 'ADAPTIVE_BANNER',
-} as const;
-
-const NATIVE_BANNER_BOTTOM_MARGIN = 96;
+const NON_PERSONALIZED_ADS = true;
 
 const InterstitialAdPluginEvents = {
   Dismissed: 'interstitialAdDismissed',
@@ -150,8 +141,10 @@ export async function initializeAdMob() {
       console.log('[AdMob] Initializing start', {
         platform: Capacitor.getPlatform(),
         testMode: AD_TEST_MODE,
+        nonPersonalizedAds: NON_PERSONALIZED_ADS,
       });
       console.log('[AdMob] initialize proxy ready');
+      // This app is submitted as a non-tracking app, so ATT is not requested here.
       await plugin.initialize({ requestTrackingAuthorization: false, initializeForTesting: AD_TEST_MODE });
       _initialized = true;
       console.log('[AdMob] Initialized successfully');
@@ -212,7 +205,12 @@ export async function showInterstitialAd(): Promise<void> {
 
   try {
     const unitId = getAdUnitId(platform, 'interstitialId');
-    console.log('[AdMob] Showing interstitial', { platform, adId: unitId, testMode: AD_TEST_MODE });
+    console.log('[AdMob] Showing interstitial', {
+      platform,
+      adId: unitId,
+      testMode: AD_TEST_MODE,
+      nonPersonalizedAds: NON_PERSONALIZED_ADS,
+    });
 
     await new Promise<void>(async (resolve) => {
       let finished = false;
@@ -240,7 +238,11 @@ export async function showInterstitialAd(): Promise<void> {
       timeoutId = setTimeout(() => finish(true), 12000);
 
       try {
-        await plugin.prepareInterstitial({ adId: unitId, isTesting: AD_TEST_MODE });
+        await plugin.prepareInterstitial({
+          adId: unitId,
+          isTesting: AD_TEST_MODE,
+          npa: NON_PERSONALIZED_ADS,
+        });
         await plugin.showInterstitial();
       } catch (e) {
         console.error('[AdMob] prepare/show interstitial error', e);
