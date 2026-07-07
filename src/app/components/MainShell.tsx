@@ -11,11 +11,11 @@ import { AudioPlayerModal } from './AudioPlayerModal';
 function PetDropdown() {
   const { pets, setPets, selectedPetIdx, setSelectedPetIdx, showProfileDropdown, setShowProfileDropdown, lang, setShowPetFormModal, setEditingPet, setShowPrivacyPolicy, isPremium, setShowPremiumModal } = useApp();
   const current = pets[selectedPetIdx];
-  const FREE_PET_LIMIT = 2;
+  const FREE_PET_LIMIT = 1;
 
   const handleAddPet = () => {
     setShowProfileDropdown(false);
-    // Block non-premium users from adding more than 2 pets
+    // Block non-premium users from adding more than 1 pet
     if (!isPremium && pets.length >= FREE_PET_LIMIT) {
       setShowPremiumModal(true);
       return;
@@ -197,7 +197,7 @@ const NAV_ITEMS = [
 
 // ─── Main Shell ───────────────────────────────────────────────────────────────
 export function MainShell() {
-  const { activeTab, setActiveTab, lang, showAudioModal, setShowAudioModal, isAudioPlaying, isPremium, setShowPremiumModal } = useApp();
+  const { activeTab, setActiveTab, lang, showAudioModal, setShowAudioModal, isAudioPlaying, isPremium, setShowPremiumModal, returnToWelcome } = useApp();
   const KO = lang === 'KO';
 
   const TAB_MAP = {
@@ -230,7 +230,7 @@ export function MainShell() {
           <button
             type="button"
             aria-label="Go home"
-            onClick={() => setActiveTab('profile')}
+            onClick={returnToWelcome}
             className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 z-50 w-[96px] h-[96px] flex items-center justify-center overflow-visible active:scale-95 transition-transform"
           >
             <img src="/logo.png" alt="Momentail Logo" className="w-[90px] h-[90px] object-contain" />

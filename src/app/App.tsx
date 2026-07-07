@@ -101,6 +101,7 @@ export interface AppContextType {
   audioCurrentTime: number;
   audioDuration: number;
   seekAudio: (time: number) => void;
+  returnToWelcome: () => void;
 }
 
 export const AppContext = createContext<AppContextType>(null!);
@@ -253,6 +254,16 @@ export default function App() {
     }
   };
 
+  const returnToWelcome = () => {
+    setShowProfileDropdown(false);
+    setShowAudioModal(false);
+    setShowPetFormModal(false);
+    setShowPrivacyPolicy(false);
+    setShowPremiumModal(false);
+    setActiveTab('profile');
+    setUser(null);
+  };
+
   // Check ?premium=success
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -351,6 +362,7 @@ export default function App() {
     showPremiumModal, setShowPremiumModal,
     editingPet, setEditingPet,
     audioCurrentTime, audioDuration, seekAudio,
+    returnToWelcome,
   };
 
   if (isPrivacyRoute) {
