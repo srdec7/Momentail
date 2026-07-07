@@ -227,11 +227,14 @@ export function MainShell() {
           <PetDropdown />
 
           {/* Logo center */}
-          <div className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50">
-            <div className="w-[90px] h-[90px] flex items-center justify-center overflow-visible">
-              <img src="/logo.png" alt="Momentail Logo" className="w-full h-full object-contain" />
-            </div>
-          </div>
+          <button
+            type="button"
+            aria-label="Go home"
+            onClick={() => setActiveTab('profile')}
+            className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 z-50 w-[96px] h-[96px] flex items-center justify-center overflow-visible active:scale-95 transition-transform"
+          >
+            <img src="/logo.png" alt="Momentail Logo" className="w-[90px] h-[90px] object-contain" />
+          </button>
 
           {/* Right: Lang Toggle */}
           <div className="flex flex-col items-end gap-1.5 mt-1">

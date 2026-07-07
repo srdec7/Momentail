@@ -15,22 +15,22 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
       className="absolute inset-0 z-[100] flex flex-col bg-[#F5F3EE]"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#2C3639]/10 bg-white">
-        <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: '#2C3639' }}>
+      <div className="flex items-center justify-between gap-3 px-5 pb-4 border-b border-[#2C3639]/10 bg-white" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 28px)' }}>
+        <h3 className="text-[17px] leading-tight font-bold flex items-center gap-2 min-w-0 flex-1 pr-2" style={{ color: '#2C3639' }}>
           <Shield size={20} color="#A27B5C" />
           {KO ? '개인정보처리방침 및 면책조항' : 'Privacy Policy & Disclaimer'}
         </h3>
         <button
           onClick={onClose}
-          className="p-2 rounded-full"
+          className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 active:scale-95 transition-transform"
           style={{ background: 'rgba(44,54,57,0.05)', color: '#2C3639' }}
         >
-          <X size={18} />
+          <X size={24} />
         </button>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-5 text-sm leading-relaxed" style={{ color: '#5C6B64' }}>
+      <div className="flex-1 overflow-y-auto px-5 pt-6 pb-8 text-sm leading-relaxed" style={{ color: '#5C6B64' }}>
         {KO ? (
           <>
             <h4 className="font-bold text-[#2C3639] mb-2 text-base">1. 수집하는 개인정보의 항목</h4>
@@ -94,6 +94,14 @@ export function PrivacyPolicy({ onClose }: { onClose: () => void }) {
             </p>
           </>
         )}
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-6 mb-8 w-full rounded-2xl py-4 text-sm font-bold active:scale-[0.98] transition-transform"
+          style={{ background: '#2C3639', color: '#FFFFFF', boxShadow: '0 10px 24px rgba(44,54,57,0.18)' }}
+        >
+          Close
+        </button>
       </div>
     </motion.div>
   );
